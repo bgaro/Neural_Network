@@ -1,3 +1,5 @@
+TEST BRANCH USED FOR TEST PURPOSE NOT FINAL RESULT
+
 # Neural_Network
 
 Masaryk Neural Network project
