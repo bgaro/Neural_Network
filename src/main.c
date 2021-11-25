@@ -2,22 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include "activation.h"
+#include "matrix.h"
 
 #define INPUT_NEURON 2
 #define HIDDEN_NEURON 2
 #define OUTPUT_NEURON 1
 #define LAYER_NUM 3
 #define TRAINING_SET_SIZE 4
-
-float error_function(float *output_layer, float *expected_output, int size)
-{
-    float error = 0;
-    for (int i = 0; i < size; i++)
-    {
-        error += 0.5 * pow(output_layer[i] - expected_output[i], 2);
-    }
-    return error;
-}
 
 int main()
 {
@@ -37,8 +28,9 @@ int main()
         {1},
         {1},
         {0}};
+    float output[4][1];
 
-    float input_layer[INPUT_NEURON] = {1, 0};
+    float input_layer[INPUT_NEURON] = {1, 1};
     float hidden_layer[HIDDEN_NEURON];
     float output_layer[OUTPUT_NEURON];
 
@@ -77,8 +69,6 @@ int main()
         {
             hidden_layer[i] += weight_input_hidden[j][i] * input_layer[j];
         }
-
-        hidden_layer[i] = unit_step(hidden_layer[i]);
     }
 
     for (int i = 0; i < OUTPUT_NEURON; i++)
@@ -87,13 +77,13 @@ int main()
 
         for (int j = 0; j < HIDDEN_NEURON; j++)
         {
-            output_layer[i] += weight_hidden_output[j][i] * hidden_layer[j];
+            output_layer[i] += weight_hidden_output[j][i] * unit_step(hidden_layer[j]);
         }
 
-        output_layer[i] = unit_step(output_layer[i]);
+        output_layer[i] = output_layer[i];
     }
 
-    printf("%f\n", output_layer[0]);
+    printf("%f\n", unit_step(output_layer[0]));
 
     return 0;
 }
