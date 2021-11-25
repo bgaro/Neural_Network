@@ -9,7 +9,7 @@ echo "#################"
 echo "    COMPILING    "
 echo "#################"
 
-gcc -Wall ./src/main.c ./src/activation.c -o main
+gcc -Wall ./src/main.c ./src/activation.c -o main -lm
 
 echo "#################"
 echo "     RUNNING     "

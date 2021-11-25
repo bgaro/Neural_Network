@@ -1,13 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "activation.h"
 
 #define INPUT_NEURON 2
 #define HIDDEN_NEURON 2
 #define OUTPUT_NEURON 1
+#define LAYER_NUM 3
+#define TRAINING_SET_SIZE 4
+
+float error_function(float *output_layer, float *expected_output, int size)
+{
+    float error = 0;
+    for (int i = 0; i < size; i++)
+    {
+        error += 0.5 * pow(output_layer[i] - expected_output[i], 2);
+    }
+    return error;
+}
 
 int main()
 {
+
+    // [[0,0],0]
+    // [[0,1],1]
+    // [[1,0],1]
+    // [[1,1],0]
+
+    float training_set[TRAINING_SET_SIZE][INPUT_NEURON] = {
+        {0, 0},
+        {0, 1},
+        {1, 0},
+        {1, 1}};
+    float expected_output[4][1] = {
+        {0},
+        {1},
+        {1},
+        {0}};
 
     float input_layer[INPUT_NEURON] = {1, 0};
     float hidden_layer[HIDDEN_NEURON];
