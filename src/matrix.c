@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 typedef struct
 {
     int rows;
@@ -54,27 +54,47 @@ void matrix_free(matrix_t *m)
     free(m);
 }
 
-matrix_t *matrix_add(matrix_t *m1, matrix_t *m2)
+void matrix_add(matrix_t *m1, matrix_t *m2)
 {
     if (m1 == NULL || m2 == NULL)
     {
         printf("Error matrix_add, matrix doesn't exists\n");
-        return NULL;
+        return;
     }
-    if (m1->rows != m2->rows || m1->cols != m2->cols)
+    if ((m1->rows != m2->rows) || (m1->cols != m2->cols))
     {
         printf("Error: Matrix dimensions do not match\n");
-        return NULL;
+        return;
     }
-    matrix_t *m = matrix_create(m1->rows, m1->cols);
     for (int i = 0; i < m1->rows; i++)
     {
         for (int j = 0; j < m1->cols; j++)
         {
-            m->data[i][j] = m1->data[i][j] + m2->data[i][j];
+            m1->data[i][j] = m1->data[i][j] + m2->data[i][j];
         }
     }
-    return m;
+}
+
+void matrix_initize(matrix_t *m, int rows, int cols, float array[rows][cols])
+
+{
+    if (m == NULL || array == NULL)
+    {
+        printf("Error matrix_initize, matrix doesn't exists\n");
+        return;
+    }
+    if (rows != m->rows || cols != m->cols)
+    {
+        printf("Error: Matrix dimensions do not match\n");
+        return;
+    }
+    for (int i = 0; i < m->rows; i++)
+    {
+        for (int j = 0; j < m->cols; j++)
+        {
+            m->data[i][j] = array[i][j];
+        }
+    }
 }
 
 matrix_t *matrix_multiply(matrix_t *m1, matrix_t *m2)
@@ -84,6 +104,7 @@ matrix_t *matrix_multiply(matrix_t *m1, matrix_t *m2)
         printf("Error matrix_multiply, matrix doesn't exists\n");
         return NULL;
     }
+    printf("%d %d || %d %d\n", m1->rows, m1->cols, m2->rows, m2->cols);
     if (m1->cols != m2->rows)
     {
         printf("Error: Matrix dimensions do not match\n");
@@ -139,25 +160,23 @@ matrix_t *matrix_transpose(matrix_t *m)
     return m_t;
 }
 
-matrix_t *matrix_subtract(matrix_t *m1, matrix_t *m2)
+void matrix_subtract(matrix_t *m1, matrix_t *m2)
 {
     if (m1 == NULL || m2 == NULL)
     {
         printf("Error matrix_subtract, matrix doesn't exists\n");
-        return NULL;
+        return;
     }
     if (m1->rows != m2->rows || m1->cols != m2->cols)
     {
         printf("Error: Matrix dimensions do not match\n");
-        return NULL;
+        return;
     }
-    matrix_t *m = matrix_create(m1->rows, m1->cols);
     for (int i = 0; i < m1->rows; i++)
     {
         for (int j = 0; j < m1->cols; j++)
         {
-            m->data[i][j] = m1->data[i][j] - m2->data[i][j];
+            m1->data[i][j] = m1->data[i][j] - m2->data[i][j];
         }
     }
-    return m;
 }

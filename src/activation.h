@@ -1,9 +1,9 @@
+
 /**
  * @brief unit step activation functions
- * @param x input : inner potential
- * @return 0 if x<0, 1 if x>=0
+ * @param m input : matrix to apply activation function to
  **/
-float unit_step(float x);
+void unit_step(matrix_t *m);
 
 /**
  * @brief ReLU activation functions

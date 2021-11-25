@@ -33,9 +33,8 @@ matrix_t *matrix_multiply(matrix_t *m1, matrix_t *m2);
  * @brief add matrix m1 to matrix m2
  * @param m1 The first matrix.
  * @param m2 The second matrix.
- * @return pointer to new matrix.
  * */
-matrix_t *matrix_add(matrix_t *m1, matrix_t *m2);
+void matrix_add(matrix_t *m1, matrix_t *m2);
 
 /**
  * @brief free the given matrix
@@ -62,6 +61,15 @@ matrix_t *matrix_transpose(matrix_t *m);
  * @brief subtract matrix m2 from matrix m1
  * @param m1 The first matrix.
  * @param m2 The second matrix.
- * @return pointer to new matrix.
  * */
-matrix_t *matrix_subtract(matrix_t *m1, matrix_t *m2);
+void matrix_subtract(matrix_t *m1, matrix_t *m2);
+
+/**
+ * @brief initialize matrix data with array values
+ * @param m The matrix to initialize.
+ * @param rows The number of rows.
+ * @param cols The number of columns.
+ * @param array The array of values.
+ * @return void
+ * */
+void matrix_initize(matrix_t *m, int rows, int cols, float array[rows][cols]);
