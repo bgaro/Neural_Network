@@ -9,10 +9,10 @@ echo "#################"
 echo "    COMPILING    "
 echo "#################"
 
-# g++ -Wall -std=c++17 -O3 src/main.cpp src/file2 -o network
+gcc -Wall ./src/main.c ./src/activation.c -o main
 
 echo "#################"
 echo "     RUNNING     "
 echo "#################"
 
-# ./network
+./main
