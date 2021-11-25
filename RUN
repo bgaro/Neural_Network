@@ -16,3 +16,5 @@ echo "     RUNNING     "
 echo "#################"
 
 ./main
+
+rm ./main
