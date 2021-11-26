@@ -3,18 +3,17 @@
  * @brief unit step activation functions
  * @param m input : matrix to apply activation function to
  **/
-void unit_step(matrix_t *m);
-
+matrix_t *unit_step(matrix_t *m);
 /**
  * @brief ReLU activation functions
  * @param x input : inner potential
- * @return 0 if x<0, x if x>=0
+ * @return pointer to matrix
  **/
-float reLU(float x);
+matrix_t *reLU(matrix_t *m);
 
 /**
  * @brief ReLU_derivative activation functions
  * @param x input : inner potential
- * @return 0 if x<0, 1 if x>=0
+ * @return pointer to matrix 
  **/
-float reLU_derivative(float x);
+matrix_t *reLU_derivate(matrix_t *m);

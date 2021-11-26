@@ -7,6 +7,23 @@ typedef struct
     float **data;
 } matrix_t;
 
+matrix_t *matrix_copy(matrix_t *m)
+{
+    matrix_t *copy = malloc(sizeof(matrix_t));
+    copy->rows = m->rows;
+    copy->cols = m->cols;
+    copy->data = malloc(sizeof(float *) * m->rows);
+    for (int i = 0; i < m->rows; i++)
+    {
+        copy->data[i] = malloc(sizeof(float) * m->cols);
+        for (int j = 0; j < m->cols; j++)
+        {
+            copy->data[i][j] = m->data[i][j];
+        }
+    }
+    return copy;
+}
+
 matrix_t *matrix_create(int rows, int cols)
 {
     if (rows == 0 || cols == 0)
@@ -75,6 +92,26 @@ void matrix_add(matrix_t *m1, matrix_t *m2)
     }
 }
 
+matrix_t *matrix_diagonalize(matrix_t *m)
+{
+    if (m == NULL)
+    {
+        printf("Error matrix_diagonalize, matrix doesn't exists\n");
+        return NULL;
+    }
+    if (m->cols != 1)
+    {
+        printf("Error: Matrix is not a vector\n");
+        return NULL;
+    }
+    matrix_t *diag = matrix_create(m->rows, m->rows);
+    for (int i = 0; i < m->rows; i++)
+    {
+        diag->data[i][i] = m->data[i][0];
+    }
+    return diag;
+}
+
 void matrix_initize(matrix_t *m, int rows, int cols, float array[rows][cols])
 
 {
@@ -104,7 +141,6 @@ matrix_t *matrix_multiply(matrix_t *m1, matrix_t *m2)
         printf("Error matrix_multiply, matrix doesn't exists\n");
         return NULL;
     }
-    printf("%d %d || %d %d\n", m1->rows, m1->cols, m2->rows, m2->cols);
     if (m1->cols != m2->rows)
     {
         printf("Error: Matrix dimensions do not match\n");

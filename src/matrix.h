@@ -14,6 +14,13 @@ typedef struct
 matrix_t *matrix_create(int rows, int cols);
 
 /**
+ * @brief copy the given matrix
+ * @param m The matrix to copy.
+ * @return A pointer to the new matrix.
+ * */
+matrix_t *matrix_copy(matrix_t *m);
+
+/**
  * @brief multiply given matrix by constant c
  * @param m The matrix to multiply.
  * @param c The constant to multiply by.
@@ -42,6 +49,13 @@ void matrix_add(matrix_t *m1, matrix_t *m2);
  * @return void
  * */
 void matrix_free(matrix_t *m);
+
+/**
+ * @brief Diagonalize a vector
+ * @param m The vector to diagonalize. (col = 1)
+ * @return pointer to matrix
+ * */
+matrix_t *matrix_diagonalize(matrix_t *m);
 
 /**
  * @brief print the given matrix
