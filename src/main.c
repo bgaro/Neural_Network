@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "matrix.h"
 #include "activation.h"
-
+#include "csv_to_array.h"
 #define INPUT_NEURON 2
 #define HIDDEN_NEURON 4
 #define OUTPUT_NEURON 1
