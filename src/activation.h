@@ -17,3 +17,7 @@ matrix_t *reLU(matrix_t *m);
  * @return pointer to matrix 
  **/
 matrix_t *reLU_derivate(matrix_t *m);
+
+matrix_t *sigmoid(matrix_t *m);
+
+matrix_t *sigmoid_derivative(matrix_t *m);

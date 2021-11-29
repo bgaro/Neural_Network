@@ -13,6 +13,7 @@ typedef struct
  */
 matrix_t *matrix_create(int rows, int cols);
 
+matrix_t *matrix_sum(matrix_t *m);
 /**
  * @brief copy the given matrix
  * @param m The matrix to copy.
@@ -98,4 +99,4 @@ void matrix_subtract(matrix_t *m1, matrix_t *m2);
  * @param array The array of values.
  * @return void
  * */
-void matrix_initize(matrix_t *m, int rows, int cols, float array[rows][cols]);
+void matrix_initialize(matrix_t *m, int rows, int cols, float array[rows][cols]);

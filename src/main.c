@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include "matrix.h"
 #include "activation.h"
 
 #define INPUT_NEURON 2
-#define HIDDEN_NEURON 2
+#define HIDDEN_NEURON 4
 #define OUTPUT_NEURON 1
 #define LAYER_NUM 3
 #define TRAINING_SET_SIZE 4
 #define OUPUT_SIZE 1
-#define EPOCH 1000
+#define EPOCH 10000
 
 int main()
 {
@@ -21,7 +20,7 @@ int main()
         {0, 1},
         {1, 0},
         {1, 1}};
-    matrix_initize(training_set, TRAINING_SET_SIZE, INPUT_NEURON, training_set_data);
+    matrix_initialize(training_set, TRAINING_SET_SIZE, INPUT_NEURON, training_set_data);
 
     matrix_t *expected_output = matrix_create(TRAINING_SET_SIZE, OUTPUT_NEURON);
     float expected_output_data[TRAINING_SET_SIZE][OUTPUT_NEURON] = {
@@ -29,21 +28,43 @@ int main()
         {1},
         {1},
         {0}};
-    matrix_initize(expected_output, TRAINING_SET_SIZE, OUTPUT_NEURON, expected_output_data);
+    matrix_initialize(expected_output, TRAINING_SET_SIZE, OUTPUT_NEURON, expected_output_data);
 
-    matrix_t *activation_matrix;
+    //feed forward matrix
+    matrix_t *activation_output_matrix;
+    matrix_t *activation_hidden_matrix;
+    matrix_t *activation_input_matrix;
+    matrix_t *activation_input_matrix_transpose;
     matrix_t *input_layer = matrix_create(INPUT_NEURON, 1);
     matrix_t *hidden_layer;
     matrix_t *output_layer;
-    matrix_t *output = matrix_create(TRAINING_SET_SIZE, OUTPUT_NEURON);
-    matrix_t *derivate_output = matrix_copy(output);
+
+    matrix_t *derivate_output;
+    matrix_t *derivate_output_diag;
     matrix_t *derivate_hidden;
+    matrix_t *derivate_hidden_error;
+    matrix_t *derivate_hidden_diag;
+    matrix_t *expected_output_step = matrix_create(OUTPUT_NEURON, 1);
+    matrix_t *derivate_error_hidden_layer;
+    matrix_t *derivate_error_hidden_layer_diag;
+    matrix_t *derivate_error_hidden_layer_transpose;
+    matrix_t *derivate_error_output_layer;
+    matrix_t *derivate_predicted_output;
+    matrix_t *derivate_error_output_layer_diag;
+    matrix_t *derivate_hidden_activation;
+    matrix_t *derivate_output_activiation;
     matrix_t *diagonal_error_gradient;
     matrix_t *error_weight_gradient_output = matrix_create(OUTPUT_NEURON, HIDDEN_NEURON);
-    float learning_rate = 0.1;
+    float learning_rate = -0.1;
     matrix_t *error_weight_gradient_hidden = matrix_create(HIDDEN_NEURON, INPUT_NEURON);
     matrix_t *error_weight_gradient_output_step;
+    matrix_t *error_weight_gradient_output_step_transpose;
     matrix_t *error_weight_gradient_hidden_step;
+    matrix_t *error_weight_gradient_bias_output_step;
+    matrix_t *error_weight_gradient_bias_hidden_step;
+    matrix_t *error_weight_gradient_bias_output = matrix_create(OUTPUT_NEURON, 1);
+    matrix_t *error_weight_gradient_bias_hidden = matrix_create(HIDDEN_NEURON, 1);
+
     matrix_t *tmp;
     matrix_t *tmp2;
     matrix_t *tmp3;
@@ -55,74 +76,87 @@ int main()
     matrix_initialize_random(weight_hidden_output, 100);
 
     matrix_t *bias_hidden = matrix_create(HIDDEN_NEURON, 1);
+    matrix_initialize_random(bias_hidden, 100);
     matrix_t *bias_output = matrix_create(OUTPUT_NEURON, 1);
+    matrix_initialize_random(bias_output, 100);
 
     // XOR initialization
-
-    bias_hidden->data[0][0] = 0;
-    bias_hidden->data[1][0] = 0;
-
-    bias_output->data[0][0] = 0;
 
     for (int j = 0; j < EPOCH; j++)
     {
         for (int i = 0; i < TRAINING_SET_SIZE; i++)
         {
             //Feed forward process
+
+            //initialisation of input layer
             input_layer->data[0][0] = training_set->data[i][0];
             input_layer->data[1][0] = training_set->data[i][1];
+
+            //feed forward on hidden layer
             hidden_layer = matrix_multiply(weight_input_hidden, input_layer);
             matrix_add(hidden_layer, bias_hidden);
-            activation_matrix = reLU(hidden_layer);
+            activation_hidden_matrix = reLU(hidden_layer);
 
-            output_layer = matrix_multiply(weight_hidden_output, activation_matrix);
+            //feed forward on output layer
+            output_layer = matrix_multiply(weight_hidden_output, activation_hidden_matrix);
             matrix_add(output_layer, bias_output);
-            tmp = reLU(output_layer);
-
-            output->data[i][0] = tmp->data[0][0];
-
+            activation_output_matrix = reLU(output_layer);
             // error function gradiant
-            tmp->data[0][0] = tmp->data[0][0] - expected_output->data[i][0];
 
-            diagonal_error_gradient = matrix_diagonalize(tmp);
+            // yj - dkj for j in Y (output layer)
+            //matrix_initialize(expected_output_step, expected_output_step->rows, expected_output_step->cols, &expected_output->data[i][0]);
+            expected_output_step->data[0][0] = expected_output->data[i][0] - activation_output_matrix->data[0][0];
 
-            matrix_free(tmp);
-            tmp = reLU_derivate(output_layer);
+            // dEk/dyj for j in Y (output layer)
+            matrix_multiply_constant(expected_output_step, -1);
+            derivate_error_output_layer = matrix_copy(expected_output_step);
 
-            derivate_hidden = matrix_multiply(tmp, diagonal_error_gradient);
-            matrix_free(tmp);
-            tmp2 = matrix_multiply(derivate_hidden, weight_hidden_output);
-            tmp = matrix_transpose(tmp2);
-            matrix_free(tmp2);
-            tmp2 = reLU_derivate(output_layer);
-            tmp3 = matrix_diagonalize(tmp2);
-            matrix_free(tmp2);
-            tmp2 = matrix_multiply(diagonal_error_gradient, tmp3);
-            tmp4 = matrix_multiply(activation_matrix, tmp2);
-            error_weight_gradient_output_step = matrix_transpose(tmp4);
-            matrix_free(tmp2);
-            matrix_free(tmp3);
-            matrix_add(error_weight_gradient_output, error_weight_gradient_output_step);
+            // dEk/dyj for j in Z \ (Y U X) (hidden layer)
 
-            tmp2 = reLU_derivate(hidden_layer);
-            tmp3 = matrix_diagonalize(tmp2);
-            matrix_free(tmp2);
-            tmp2 = matrix_multiply(tmp3, tmp);
-            matrix_free(tmp3);
-            tmp3 = unit_step(input_layer);
-            tmp = matrix_transpose(tmp3);
-            error_weight_gradient_hidden_step = matrix_multiply(tmp2, tmp);
+            derivate_output = reLU_derivate(output_layer);
 
+            derivate_output_diag = matrix_diagonalize(derivate_output);
+            derivate_output_activiation = matrix_multiply(derivate_output_diag, derivate_error_output_layer); // dEk/dyr * sigma'r(xi r) for r in j->
+            derivate_error_hidden_layer = matrix_multiply(derivate_output_activiation, weight_hidden_output); //dEk/dyj
+            derivate_error_hidden_layer_transpose = matrix_transpose(derivate_error_hidden_layer);
+
+            // dEk/dwij for j in Y(output layer)
+            error_weight_gradient_output_step_transpose = matrix_multiply(activation_hidden_matrix, derivate_output_activiation);
+            error_weight_gradient_output_step = matrix_transpose(error_weight_gradient_output_step_transpose); //transpose so it is of the form of weight matrix
+            matrix_add(error_weight_gradient_output, error_weight_gradient_output_step);                       //sum of each training set
+
+            //bias of output layer update
+
+            derivate_error_output_layer_diag = matrix_diagonalize(derivate_error_output_layer);
+            error_weight_gradient_bias_output_step = matrix_multiply(derivate_error_output_layer_diag, bias_output); //dek/dwij
+            matrix_add(error_weight_gradient_bias_output, error_weight_gradient_bias_output_step);
+
+            //dEk/dwij for j in Z \ (Y U X) (hidden layer)
+            derivate_hidden = reLU_derivate(hidden_layer);
+            derivate_hidden_diag = matrix_diagonalize(derivate_hidden);
+            derivate_hidden_error = matrix_multiply(derivate_hidden_diag, derivate_error_hidden_layer_transpose);
+
+            activation_input_matrix = reLU(input_layer);
+            activation_input_matrix_transpose = matrix_transpose(activation_input_matrix);
+            error_weight_gradient_hidden_step = matrix_multiply(derivate_hidden_error, activation_input_matrix_transpose);
             matrix_add(error_weight_gradient_hidden, error_weight_gradient_hidden_step);
+
+            //bias of hidden layer update
+            derivate_error_hidden_layer_diag = matrix_diagonalize(derivate_error_hidden_layer_transpose);
+            error_weight_gradient_bias_hidden_step = matrix_multiply(derivate_error_hidden_layer_diag, bias_hidden);
+            matrix_add(error_weight_gradient_bias_hidden, error_weight_gradient_bias_hidden_step);
+
+            matrix_multiply_constant(error_weight_gradient_bias_output_step, learning_rate);
+            matrix_multiply_constant(error_weight_gradient_bias_hidden_step, learning_rate);
+            matrix_multiply_constant(error_weight_gradient_output_step, learning_rate);
+            matrix_multiply_constant(error_weight_gradient_hidden_step, learning_rate);
+            matrix_add(bias_output, error_weight_gradient_bias_output_step);
+            matrix_add(bias_hidden, error_weight_gradient_bias_hidden_step);
+            matrix_add(weight_hidden_output, error_weight_gradient_output_step);
+            matrix_add(weight_input_hidden, error_weight_gradient_hidden_step);
         }
 
-        matrix_multiply_constant(error_weight_gradient_output, (1.0 / TRAINING_SET_SIZE));
-        matrix_multiply_constant(error_weight_gradient_output, -learning_rate);
-
-        matrix_multiply_constant(error_weight_gradient_hidden, (1.0 / TRAINING_SET_SIZE));
-        matrix_multiply_constant(error_weight_gradient_hidden, -learning_rate);
-        matrix_add(weight_hidden_output, error_weight_gradient_output);
-        matrix_add(weight_input_hidden, error_weight_gradient_hidden);
+        //matrix_print(weight_hidden_output);
     }
     //free block
 
@@ -131,21 +165,25 @@ int main()
     for (int i = 0; i < TRAINING_SET_SIZE; i++)
     {
         //Feed forward process
+
+        //initialisation of input layer
         input_layer->data[0][0] = training_set->data[i][0];
         input_layer->data[1][0] = training_set->data[i][1];
+
+        //feed forward on hidden layer
         hidden_layer = matrix_multiply(weight_input_hidden, input_layer);
         matrix_add(hidden_layer, bias_hidden);
-        activation_matrix = reLU(hidden_layer);
+        activation_hidden_matrix = reLU(hidden_layer);
 
-        output_layer = matrix_multiply(weight_hidden_output, activation_matrix);
+        //feed forward on output layer
+        output_layer = matrix_multiply(weight_hidden_output, activation_hidden_matrix);
         matrix_add(output_layer, bias_output);
-        tmp = reLU(output_layer);
+        activation_output_matrix = reLU(output_layer);
         printf("input :\n");
         matrix_print(input_layer);
         printf("output :\n");
-        matrix_print(tmp);
+        matrix_print(output_layer);
     }
-    matrix_free(activation_matrix);
     matrix_free(input_layer);
     matrix_free(hidden_layer);
     matrix_free(output_layer);

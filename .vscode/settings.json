@@ -1,5 +1,6 @@
 {
   "files.associations": {
-    "activation.h": "c"
+    "activation.h": "c",
+    "matrix.h": "c"
   }
 }

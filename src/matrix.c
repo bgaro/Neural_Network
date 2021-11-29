@@ -71,6 +71,19 @@ void matrix_free(matrix_t *m)
     free(m);
 }
 
+matrix_t *matrix_sum(matrix_t *m)
+{
+    matrix_t *result = matrix_create(1, m->cols);
+    for (int i = 0; i < m->rows; i++)
+    {
+        for (int j = 0; j < m->cols; j++)
+        {
+            result->data[0][j] += m->data[i][j];
+        }
+    }
+    return result;
+}
+
 void matrix_add(matrix_t *m1, matrix_t *m2)
 {
     if (m1 == NULL || m2 == NULL)
@@ -145,7 +158,7 @@ matrix_t *matrix_diagonalize(matrix_t *m)
     return diag;
 }
 
-void matrix_initize(matrix_t *m, int rows, int cols, float array[rows][cols])
+void matrix_initialize(matrix_t *m, int rows, int cols, float array[rows][cols])
 
 {
     if (m == NULL || array == NULL)
