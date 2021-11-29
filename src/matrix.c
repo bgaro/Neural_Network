@@ -92,6 +92,39 @@ void matrix_add(matrix_t *m1, matrix_t *m2)
     }
 }
 
+matrix_t *matrix_transpose(matrix_t *m)
+{
+    if (m == NULL)
+    {
+        printf("Error matrix_transpose, matrix doesn't exists\n");
+        return NULL;
+    }
+    matrix_t *transpose = matrix_create(m->cols, m->rows);
+    for (int i = 0; i < m->rows; i++)
+    {
+        for (int j = 0; j < m->cols; j++)
+        {
+            transpose->data[j][i] = m->data[i][j];
+        }
+    }
+    return transpose;
+}
+void matrix_initialize_random(matrix_t *m, int seed)
+{
+    if (m == NULL)
+    {
+        printf("Error matrix_initialize_random, matrix doesn't exists\n");
+        return;
+    }
+    srand(seed);
+    for (int i = 0; i < m->rows; i++)
+    {
+        for (int j = 0; j < m->cols; j++)
+        {
+            m->data[i][j] = (float)rand() / (float)RAND_MAX;
+        }
+    }
+}
 matrix_t *matrix_diagonalize(matrix_t *m)
 {
     if (m == NULL)
@@ -176,24 +209,6 @@ void matrix_multiply_constant(matrix_t *m, float c)
             m->data[i][j] *= c;
         }
     }
-}
-
-matrix_t *matrix_transpose(matrix_t *m)
-{
-    if (m == NULL)
-    {
-        printf("Error matrix_transpose, matrix doesn't exists\n");
-        return NULL;
-    }
-    matrix_t *m_t = matrix_create(m->cols, m->rows);
-    for (int i = 0; i < m->rows; i++)
-    {
-        for (int j = 0; j < m->cols; j++)
-        {
-            m_t->data[j][i] = m->data[i][j];
-        }
-    }
-    return m_t;
 }
 
 void matrix_subtract(matrix_t *m1, matrix_t *m2)

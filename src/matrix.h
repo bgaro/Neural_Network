@@ -58,6 +58,18 @@ void matrix_free(matrix_t *m);
 matrix_t *matrix_diagonalize(matrix_t *m);
 
 /**
+ * @brief initialize the given matrix with random values
+ * @param m The matrix to initialize.
+ * @return void
+ * */
+void matrix_initialize_random(matrix_t *m, int seed);
+/**
+ * @brief transpose the given matrix
+ * @param m The matrix to transpose.
+ * @return pointer to new matrix
+ * */
+matrix_t *matrix_transpose(matrix_t *m);
+/**
  * @brief print the given matrix
  * @param m The matrix to print.
  * @return void
