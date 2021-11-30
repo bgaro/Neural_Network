@@ -9,15 +9,15 @@ matrix_t *unit_step(matrix_t *m);
  * @param x input : inner potential
  * @return pointer to matrix
  **/
-matrix_t *reLU(matrix_t *m);
+void reLU(matrix_t *m, matrix_t *m_d);
 
 /**
  * @brief ReLU_derivative activation functions
  * @param x input : inner potential
- * @return pointer to matrix 
+ * @return pointer to matrix
  **/
-matrix_t *reLU_derivate(matrix_t *m);
+void reLU_derivate(matrix_t *m, matrix_t *m_d);
 
-matrix_t *sigmoid(matrix_t *m);
+void sigmoid(matrix_t *m, matrix_t *m_d);
 
-matrix_t *sigmoid_derivative(matrix_t *m);
+void sigmoid_derivate(matrix_t *m, matrix_t *m_d);
