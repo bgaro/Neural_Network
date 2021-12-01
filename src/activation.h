@@ -21,3 +21,7 @@ void reLU_derivate(matrix_t *m, matrix_t *m_d);
 void sigmoid(matrix_t *m, matrix_t *m_d);
 
 void sigmoid_derivate(matrix_t *m, matrix_t *m_d);
+
+void softmax(matrix_t *m, matrix_t *m_d);
+
+void softmax_derivate(matrix_t *m, matrix_t *m_d);

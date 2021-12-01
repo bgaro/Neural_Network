@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 typedef struct
 {
     int rows;
@@ -121,11 +120,10 @@ void matrix_initialize_random(matrix_t *m)
         printf("Error matrix_initialize_random, matrix doesn't exists\n");
         return;
     }
-    srand(time(NULL));
     for (int i = 0; i < m->rows * m->cols; i++)
     {
 
-        m->data[i] = (float)rand() / ((float)RAND_MAX);
+        m->data[i] = (2 * (float)rand() / ((float)RAND_MAX) - 1) / 6;
     }
 }
 void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal)

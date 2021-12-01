@@ -58,7 +58,7 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
 int get_label(matrix_t *labels)
 {
     float max = labels->data[0];
-    int index;
+    int index = 0;
     for (int i = 0; i < labels->rows * labels->cols; i++)
     {
         if (labels->data[i] > max)

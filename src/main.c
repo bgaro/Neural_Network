@@ -12,7 +12,7 @@
 #define LAYER_NUM 3
 #define TRAINING_SET_SIZE 2000
 #define OUPUT_SIZE 1
-#define EPOCH 15
+#define EPOCH 50
 
 int main()
 {
@@ -32,7 +32,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = 0.01;
+    float learning_rate = -0.05;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -201,7 +201,7 @@ int main()
             // feed forward on output layer
             matrix_multiply(weight_hidden_4_output, activation_hidden_4_matrix, output_layer);
             matrix_add(output_layer, bias_output);
-            reLU(output_layer, activation_output_matrix);
+            softmax(output_layer, activation_output_matrix);
 
             free(input_array[0]);
             free(input_array);
@@ -218,7 +218,7 @@ int main()
 
             // dEk/dyj for j in Z \ (Y U X) (hidden layer 4)
 
-            reLU_derivate(output_layer, derivate_output);
+            softmax_derivate(output_layer, derivate_output);
             matrix_diagonalize(derivate_output, derivate_output_diag);
             matrix_multiply(derivate_output_diag, derivate_error_output_layer, derivate_output_activiation); // dEk/dyr * sigma'r(xi r) for r in j->
             matrix_transpose(weight_hidden_4_output, weight_hidden_4_output_transpose);
