@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "matrix.h"
 
 #define MAX_TRAIN_VECTORS_LENGTH 2968 // Tests have been made
 #define IMAGE_SIZE 784                // Images 28*28
@@ -54,7 +55,21 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
     return NULL;
 }
 
-float csv_to_array_labels(FILE *train_vectors_stream)
+int get_label(matrix_t *labels)
+{
+    float max = labels->data[0];
+    int index;
+    for (int i = 0; i < labels->rows * labels->cols; i++)
+    {
+        if (labels->data[i] > max)
+        {
+            max = labels->data[i];
+            index = i;
+        }
+    }
+    return index;
+}
+int csv_to_array_labels_int(FILE *train_vectors_stream)
 {
 
     /* Initializations */
@@ -66,7 +81,31 @@ float csv_to_array_labels(FILE *train_vectors_stream)
         value = value - 48;
 
         fseek(train_vectors_stream, 2, SEEK_CUR);
-        return (float)value;
+
+        return value;
     }
     return -1;
+}
+
+float **csv_to_array_labels(FILE *train_vectors_stream)
+{
+
+    /* Initializations */
+    int value;
+    float **train_vectors_array;
+    train_vectors_array = malloc(sizeof(float *));
+    train_vectors_array[0] = calloc(sizeof(float), 10);
+
+    /* Getting the class of each vector */
+    if ((value = fgetc(train_vectors_stream)) != EOF)
+    {
+        value = value - 48;
+
+        fseek(train_vectors_stream, 2, SEEK_CUR);
+        if (value < 0 || value > 9)
+            return NULL;
+        train_vectors_array[0][value] = 1.0;
+        return train_vectors_array;
+    }
+    return NULL;
 }

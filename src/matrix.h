@@ -16,9 +16,10 @@ matrix_t *matrix_create(int rows, int cols);
 /**
  * @brief copy the given matrix
  * @param m The matrix to copy.
- * @return A pointer to the new matrix.
+ * @param m_copy The matrix to copy to.
+ * @return void
  * */
-matrix_t *matrix_copy(matrix_t *m);
+void matrix_copy(matrix_t *m, matrix_t *m_copy);
 
 /**
  * @brief multiply given matrix by constant c
@@ -45,6 +46,13 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul);
 void matrix_add(matrix_t *m1, matrix_t *m2);
 
 /**
+ * @brief reset matrix m to 0
+ * @param m The first matrix.
+ * @return void
+ * */
+void matrix_reset(matrix_t *m);
+
+/**
  * @brief free the given matrix
  * @param m The matrix to free.
  * @return void
@@ -64,7 +72,7 @@ void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal);
  * @param m The matrix to initialize.
  * @return void
  * */
-void matrix_initialize_random(matrix_t *m, int seed);
+void matrix_initialize_random(matrix_t *m);
 /**
  * @brief transpose the given matrix
  * @param m The matrix to transpose.

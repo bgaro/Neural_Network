@@ -7,18 +7,18 @@ typedef struct
     float *data;
 } matrix_t;
 
-matrix_t *matrix_copy(matrix_t *m)
+void matrix_copy(matrix_t *m, matrix_t *m_c)
 {
-    matrix_t *copy = malloc(sizeof(matrix_t));
-    copy->rows = m->rows;
-    copy->cols = m->cols;
-    copy->data = (float *)calloc(sizeof(float), m->rows * m->cols);
-    for (int i = 0; i < (m->rows * m->cols); i++)
+    if (m->rows != m_c->rows || m->cols != m_c->cols)
     {
-        copy->data[i] = m->data[i];
+        printf("Error: matrix_copy: matrices have different dimensions\n");
+        exit(1);
     }
 
-    return copy;
+    for (int i = 0; i < (m->rows * m->cols); i++)
+    {
+        m_c->data[i] = m->data[i];
+    }
 }
 
 matrix_t *matrix_create(int rows, int cols)
@@ -46,6 +46,19 @@ void matrix_print(matrix_t *m)
             printf("%f ", m->data[m->cols * i + j]);
         }
         printf("\n");
+    }
+}
+
+void matrix_reset(matrix_t *m)
+{
+    if (m == NULL)
+    {
+        printf("Error matrix_reset, matrix doesn't exists\n");
+        return;
+    }
+    for (int i = 0; i < m->rows * m->cols; i++)
+    {
+        m->data[i] = 0.0;
     }
 }
 
@@ -100,18 +113,17 @@ void matrix_transpose(matrix_t *m, matrix_t *m_transpose)
     }
 }
 
-void matrix_initialize_random(matrix_t *m, int seed)
+void matrix_initialize_random(matrix_t *m)
 {
     if (m == NULL)
     {
         printf("Error matrix_initialize_random, matrix doesn't exists\n");
         return;
     }
-    srand(seed);
     for (int i = 0; i < m->rows * m->cols; i++)
     {
 
-        m->data[i] = 2 * (float)rand() / (100 * (float)RAND_MAX) - 1;
+        m->data[i] = (float)random() / (50 * (float)RAND_MAX);
     }
 }
 void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal)
