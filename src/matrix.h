@@ -1,107 +1,28 @@
-typedef struct
-{
-    int rows;
-    int cols;
-    float *data;
-} matrix_t;
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void matrix_print(int ROW, int COL, double A[ROW][COL]);
+
+void matrix_vector_multiplication(double * input_vector, int INPUT_LEN, double * output_vector,
+		int OUTPUT_LEN, double weights_matrix[OUTPUT_LEN][INPUT_LEN]);
+
 
 /**
- * @brief Creates a new matrix with the given dimensions.
- * @param rows The number of rows.
- * @param cols The number of columns.
- * @return A pointer to the new matrix.
- */
-matrix_t *matrix_create(int rows, int cols);
-
-/**
- * @brief copy the given matrix
- * @param m The matrix to copy.
- * @param m_copy The matrix to copy to.
+ * @brief Multiply input_matrix1 by input_matrix2 and story it in output_matrix
+ * @param input_matrix1 The first matrix.
+ * @param input_matrix2 The second matrix.
+ * @param output_matrix The matrix to store the result.
  * @return void
  * */
-void matrix_copy(matrix_t *m, matrix_t *m_copy);
+void matrix_matrix_multiplication(uint32_t MATRIX1_ROW, uint32_t MATRIX1_COL, uint32_t MATRIX2_COL,
+									double input_matrix1[MATRIX1_ROW][MATRIX1_COL],
+									double input_matrix2[MATRIX1_COL][MATRIX2_COL],
+									double output_matrix[MATRIX1_ROW][MATRIX2_COL]);
 
-/**
- * @brief multiply given matrix by constant c
- * @param m The matrix to multiply.
- * @param c The constant to multiply by.
- * @return void
- **/
-void matrix_multiply_constant(matrix_t *m, float c);
+void matrix_matrix_sub(uint32_t MATRIX_ROW, uint32_t MATRIX_COL,
+									double input_matrix1[MATRIX_ROW][MATRIX_COL],
+									double input_matrix2[MATRIX_ROW][MATRIX_COL],
+									double output_matrix[MATRIX_ROW][MATRIX_COL]);
 
-/**
- * @brief multiply matrix m1 to matrix m2
- * @param m1 The first matrix.
- * @param m2 The second matrix.
- * @param m_mul The matrix to store the result.
- * @return void
- * */
-void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul);
-
-/**
- * @brief add matrix m1 to matrix m2
- * @param m1 The first matrix.
- * @param m2 The second matrix.
- * */
-void matrix_add(matrix_t *m1, matrix_t *m2);
-
-/**
- * @brief reset matrix m to 0
- * @param m The first matrix.
- * @return void
- * */
-void matrix_reset(matrix_t *m);
-
-/**
- * @brief free the given matrix
- * @param m The matrix to free.
- * @return void
- * */
-void matrix_free(matrix_t *m);
-
-/**
- * @brief Diagonalize a vector
- * @param m The vector to diagonalize. (col = 1)
- * @param m_diagonal The matrix to store the diagonalized vector.
- * @return void
- * */
-void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal);
-
-/**
- * @brief initialize the given matrix with random values
- * @param m The matrix to initialize.
- * @return void
- * */
-void matrix_initialize_random(matrix_t *m, int nb_neuron_out, int nb_neuron_in);
-
-void matrix_initialize_to_value(matrix_t *m, float value);
-/**
- * @brief transpose the given matrix
- * @param m The matrix to transpose.
- * @param m_transpose The matrix to store the transposed matrix.
- * @return void
- * */
-void matrix_transpose(matrix_t *m, matrix_t *m_transpose);
-/**
- * @brief print the given matrix
- * @param m The matrix to print.
- * @return void
- * */
-void matrix_print(matrix_t *m);
-
-/**
- * @brief subtract matrix m2 from matrix m1
- * @param m1 The first matrix.
- * @param m2 The second matrix.
- * */
-void matrix_subtract(matrix_t *m1, matrix_t *m2);
-
-/**
- * @brief initialize matrix data with array values
- * @param m The matrix to initialize.
- * @param rows The number of rows.
- * @param cols The number of columns.
- * @param array The array of values.
- * @return void
- * */
-void matrix_initialize(matrix_t *m, int rows, int cols, float **array);
+void matrix_transpose(uint32_t ROW, uint32_t COL, double A[ROW][COL], double A_T[COL][ROW]);
