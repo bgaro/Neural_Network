@@ -33,7 +33,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.09;
+    float learning_rate = -0.1;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -185,17 +185,17 @@ int main()
             reLU(hidden_layer_1, activation_hidden_1_matrix);
 
             // feed forward on hidden layer 2
-            matrix_multiply(weight_input_hidden_2, hidden_layer_1, hidden_layer_2);
+            matrix_multiply(weight_input_hidden_2, activation_hidden_1_matrix, hidden_layer_2);
             matrix_add(hidden_layer_2, bias_hidden_2);
             reLU(hidden_layer_2, activation_hidden_2_matrix);
 
             // feed forward on hidden layer 3
-            matrix_multiply(weight_input_hidden_3, hidden_layer_2, hidden_layer_3);
+            matrix_multiply(weight_input_hidden_3, activation_hidden_2_matrix, hidden_layer_3);
             matrix_add(hidden_layer_3, bias_hidden_3);
             reLU(hidden_layer_3, activation_hidden_3_matrix);
 
             // feed forward on hidden layer 4
-            matrix_multiply(weight_input_hidden_4, hidden_layer_3, hidden_layer_4);
+            matrix_multiply(weight_input_hidden_4, activation_hidden_3_matrix, hidden_layer_4);
             matrix_add(hidden_layer_4, bias_hidden_4);
             reLU(hidden_layer_4, activation_hidden_4_matrix);
 

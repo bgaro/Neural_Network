@@ -199,9 +199,9 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul)
     matrix_reset(m_mul);
     for (int i = 0; i < m1->rows; i++)
     {
-        for (int k = 0; k < m1->cols; k++)
+        for (int j = 0; j < m2->cols; j++)
         {
-            for (int j = 0; j < m2->cols; j++)
+            for (int k = 0; k < m1->cols; k++)
             {
 
                 m_mul->data[m_mul->cols * i + j] += m1->data[m1->cols * i + k] * m2->data[m2->cols * k + j];
