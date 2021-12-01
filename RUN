@@ -9,7 +9,7 @@ echo "#################"
 echo "    COMPILING    "
 echo "#################"
 
-gcc -Wall -g -O3 -Wextra ./src/main.c ./src/csv_to_array.c ./src/matrix.c ./src/activation.c -o main -lm
+gcc -Wall -g -Ofast -Wextra ./src/main.c ./src/csv_to_array.c ./src/matrix.c ./src/activation.c -o main -lm
 
 echo "#################"
 echo "     RUNNING     "

@@ -11,19 +11,20 @@
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 3
 #define TRAINING_SET_SIZE 2000
+#define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
 #define EPOCH 50
 
 int main()
 {
 
-    FILE *train_vectors_stream = fopen("./data/test_vectors (1).csv", "r");
+    FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
         printf("Error opening file\n");
         return 1;
     }
-    FILE *train_labels_stream = fopen("./data/test_labels (1).csv", "r");
+    FILE *train_labels_stream = fopen("./data/fashion_mnist_train_labels.csv", "r");
     if (train_labels_stream == NULL)
     {
         printf("Error opening file\n");
@@ -32,7 +33,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.05;
+    float learning_rate = -0.09;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -45,32 +46,32 @@ int main()
     matrix_t *output_layer = matrix_create(OUTPUT_NEURON, 1);
 
     matrix_t *bias_hidden_1 = matrix_create(HIDDEN_NEURON_1, 1);
-    matrix_initialize_random(bias_hidden_1);
+    matrix_initialize_to_value(bias_hidden_1, 0.01);
     matrix_t *bias_hidden_2 = matrix_create(HIDDEN_NEURON_2, 1);
-    matrix_initialize_random(bias_hidden_2);
+    matrix_initialize_to_value(bias_hidden_2, 0.01);
     matrix_t *bias_hidden_3 = matrix_create(HIDDEN_NEURON_3, 1);
-    matrix_initialize_random(bias_hidden_3);
+    matrix_initialize_to_value(bias_hidden_3, 0.01);
     matrix_t *bias_hidden_4 = matrix_create(HIDDEN_NEURON_4, 1);
-    matrix_initialize_random(bias_hidden_4);
+    matrix_initialize_to_value(bias_hidden_4, 0.01);
 
     matrix_t *bias_output = matrix_create(OUTPUT_NEURON, 1);
-    matrix_initialize_random(bias_output);
+    matrix_initialize_to_value(bias_output, 0.01);
 
     matrix_t *weight_input_hidden_1 = matrix_create(HIDDEN_NEURON_1, INPUT_NEURON);
     matrix_t *weight_input_hidden_1_transpose = matrix_create(INPUT_NEURON, HIDDEN_NEURON_1);
-    matrix_initialize_random(weight_input_hidden_1);
+    matrix_initialize_random(weight_input_hidden_1, HIDDEN_NEURON_1, INPUT_NEURON);
     matrix_t *weight_input_hidden_2 = matrix_create(HIDDEN_NEURON_2, HIDDEN_NEURON_1);
     matrix_t *weight_input_hidden_2_transpose = matrix_create(HIDDEN_NEURON_1, HIDDEN_NEURON_2);
-    matrix_initialize_random(weight_input_hidden_2);
+    matrix_initialize_random(weight_input_hidden_2, HIDDEN_NEURON_2, HIDDEN_NEURON_1);
     matrix_t *weight_input_hidden_3 = matrix_create(HIDDEN_NEURON_3, HIDDEN_NEURON_2);
     matrix_t *weight_input_hidden_3_transpose = matrix_create(HIDDEN_NEURON_2, HIDDEN_NEURON_3);
-    matrix_initialize_random(weight_input_hidden_3);
+    matrix_initialize_random(weight_input_hidden_3, HIDDEN_NEURON_3, HIDDEN_NEURON_2);
     matrix_t *weight_input_hidden_4 = matrix_create(HIDDEN_NEURON_4, HIDDEN_NEURON_3);
     matrix_t *weight_input_hidden_4_transpose = matrix_create(HIDDEN_NEURON_3, HIDDEN_NEURON_4);
-    matrix_initialize_random(weight_input_hidden_4);
+    matrix_initialize_random(weight_input_hidden_4, HIDDEN_NEURON_4, HIDDEN_NEURON_3);
     matrix_t *weight_hidden_4_output = matrix_create(OUTPUT_NEURON, HIDDEN_NEURON_4);
     matrix_t *weight_hidden_4_output_transpose = matrix_create(HIDDEN_NEURON_4, OUTPUT_NEURON);
-    matrix_initialize_random(weight_hidden_4_output);
+    matrix_initialize_random(weight_hidden_4_output, OUTPUT_NEURON, HIDDEN_NEURON_4);
 
     matrix_t *activation_hidden_1_matrix = matrix_create(HIDDEN_NEURON_1, 1);
     matrix_t *activation_hidden_1_matrix_transpose = matrix_create(1, HIDDEN_NEURON_1);
@@ -211,6 +212,7 @@ int main()
             // matrix_initialize(expected_output_step, expected_output_step->rows, expected_output_step->cols, &expected_output->data[i][0]);
             expected_output_array = csv_to_array_labels(train_labels_stream);
             matrix_initialize(expected_output, expected_output->rows, expected_output->cols, expected_output_array);
+
             matrix_transpose(expected_output, derivate_error_output_layer);
             matrix_subtract(derivate_error_output_layer, activation_output_matrix);
             matrix_multiply_constant(derivate_error_output_layer, -1.0);
@@ -318,9 +320,8 @@ int main()
             free(expected_output_array[0]);
             free(expected_output_array);
         }
-        printf("epoch %d\n", j);
+        printf("*************** EPOCH %d *************\n", j);
         matrix_print(output_layer);
-
         // update bias weight
         matrix_multiply_constant(error_weight_gradient_bias_output, -(1.0 / TRAINING_SET_SIZE) * learning_rate);
         matrix_multiply_constant(error_weight_gradient_bias_hidden_4, -(1.0 / TRAINING_SET_SIZE) * learning_rate);
@@ -364,8 +365,11 @@ int main()
         fseek(train_vectors_stream, 0, SEEK_SET);
         fseek(train_labels_stream, 0, SEEK_SET);
     }
-
-    for (int i = 0; i < TRAINING_SET_SIZE; i++)
+    fclose(train_vectors_stream);
+    fclose(train_labels_stream);
+    train_vectors_stream = fopen("./data/fashion_mnist_test_vectors.csv", "r");
+    train_labels_stream = fopen("./data/fashion_mnist_test_labels.csv", "r");
+    for (int i = 0; i < TEST_SET_SIZE; i++)
     {
 
         // Feed forward process
@@ -399,7 +403,7 @@ int main()
         // feed forward on output layer
         matrix_multiply(weight_hidden_4_output, activation_hidden_4_matrix, output_layer);
         matrix_add(output_layer, bias_output);
-        reLU(output_layer, activation_output_matrix);
+        softmax(output_layer, activation_output_matrix);
 
         matrix_print(output_layer);
 
@@ -410,7 +414,7 @@ int main()
         free(input_array[0]);
         free(input_array);
     }
-    printf("accuracy : %f percent\n", (float)cpt / (float)TRAINING_SET_SIZE * 100.0);
+    printf("accuracy : %f percent\n", (float)cpt / (float)TEST_SET_SIZE * 100.0);
     // free block
 
     matrix_free(input_layer);

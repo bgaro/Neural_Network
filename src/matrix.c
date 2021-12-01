@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 typedef struct
 {
     int rows;
@@ -113,7 +114,8 @@ void matrix_transpose(matrix_t *m, matrix_t *m_transpose)
     }
 }
 
-void matrix_initialize_random(matrix_t *m)
+void matrix_initialize_random(matrix_t *m, int nb_neuron_out, int nb_neuron_in)
+
 {
     if (m == NULL)
     {
@@ -123,9 +125,24 @@ void matrix_initialize_random(matrix_t *m)
     for (int i = 0; i < m->rows * m->cols; i++)
     {
 
-        m->data[i] = (2 * (float)rand() / ((float)RAND_MAX) - 1) / 6;
+        m->data[i] = (2 * (float)rand() / ((float)RAND_MAX) - 1) * sqrt(6.0) / sqrt(nb_neuron_out + nb_neuron_in);
     }
 }
+
+void matrix_initialize_to_value(matrix_t *m, float value)
+{
+    if (m == NULL)
+    {
+        printf("Error matrix_initialize_to_value, matrix doesn't exists\n");
+        return;
+    }
+    for (int i = 0; i < m->rows * m->cols; i++)
+    {
+
+        m->data[i] = value;
+    }
+}
+
 void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal)
 {
     if (m == NULL || m_diagonal == NULL)
@@ -179,13 +196,14 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul)
         printf("Error: Matrix dimensions do not match\n");
         return;
     }
+    matrix_reset(m_mul);
     for (int i = 0; i < m1->rows; i++)
     {
-        for (int j = 0; j < m2->cols; j++)
+        for (int k = 0; k < m1->cols; k++)
         {
-            m_mul->data[m_mul->cols * i + j] = 0;
-            for (int k = 0; k < m1->cols; k++)
+            for (int j = 0; j < m2->cols; j++)
             {
+
                 m_mul->data[m_mul->cols * i + j] += m1->data[m1->cols * i + k] * m2->data[m2->cols * k + j];
             }
         }

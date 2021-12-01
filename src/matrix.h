@@ -72,7 +72,9 @@ void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal);
  * @param m The matrix to initialize.
  * @return void
  * */
-void matrix_initialize_random(matrix_t *m);
+void matrix_initialize_random(matrix_t *m, int nb_neuron_out, int nb_neuron_in);
+
+void matrix_initialize_to_value(matrix_t *m, float value);
 /**
  * @brief transpose the given matrix
  * @param m The matrix to transpose.

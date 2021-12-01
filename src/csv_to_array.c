@@ -80,7 +80,7 @@ int csv_to_array_labels_int(FILE *train_vectors_stream)
     {
         value = value - 48;
 
-        fseek(train_vectors_stream, 2, SEEK_CUR);
+        fseek(train_vectors_stream, 1, SEEK_CUR);
 
         return value;
     }
@@ -99,9 +99,9 @@ float **csv_to_array_labels(FILE *train_vectors_stream)
     /* Getting the class of each vector */
     if ((value = fgetc(train_vectors_stream)) != EOF)
     {
-        value = value - 48;
 
-        fseek(train_vectors_stream, 2, SEEK_CUR);
+        value = value - 48;
+        fseek(train_vectors_stream, 1, SEEK_CUR);
         if (value < 0 || value > 9)
             return NULL;
         train_vectors_array[0][value] = 1.0;
