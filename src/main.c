@@ -12,7 +12,7 @@
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 60
+#define EPOCH 15
 
 int main()
 {
@@ -235,12 +235,11 @@ int main()
         // error function gradiant
 
         test = csv_to_array_labels_int(train_labels_stream);
-        printf("%d\n", test);
         if (get_label(activation_output_matrix) == test)
             cpt++;
-        free(input_array[0]);
-        free(input_array);
     }
+    fclose(train_vectors_stream);
+    fclose(train_labels_stream);
     printf("accuracy : %f percent\n", (float)cpt / (float)TEST_SET_SIZE * 100.0);
     // free block
 
@@ -282,7 +281,11 @@ int main()
     matrix_free(derivate_hidden_diag);
     matrix_free(derivate_hidden_activation);
     matrix_free(derivate_hidden_error);
-
+    matrix_free(derivate_error_activation_output);
+    matrix_free(error_weight_gradient_bias_output_previous_step);
+    matrix_free(error_weight_gradient_bias_hidden_previous_step);
+    matrix_free(error_weight_gradient_output_previous_step);
+    matrix_free(error_weight_gradient_hidden_previous_step);
     printf("end\n");
     return 0;
 }
