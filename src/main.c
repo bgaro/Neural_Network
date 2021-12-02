@@ -1,22 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include "matrix.h"
 #include "activation.h"
 #include "csv_to_array.h"
 #include "neural_network.h"
+
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON 50
+#define HIDDEN_NEURON 200
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 60000
+#define TRAINING_SET_SIZE 10000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 15
+#define EPOCH 150
 
 int main()
 {
-
+    srand(time(NULL));
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
@@ -32,8 +34,8 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.05;
-    float alpha = 0.2;
+    float learning_rate = 0.15;
+    float alpha = 0.1;
     float error = 0.0;
     int test = 0;
     int cpt = 0;
@@ -132,7 +134,7 @@ int main()
             matrix_initialize(expected_output, expected_output->rows, expected_output->cols, expected_output_array);
             matrix_transpose(expected_output, derivate_error_output_layer);
             matrix_subtract(derivate_error_output_layer, activation_output_matrix);
-            matrix_multiply_constant(derivate_error_output_layer, -1.0);
+            matrix_multiply_constant(derivate_error_output_layer, -(1.0 / TRAINING_SET_SIZE));
             softmax_derivate(activation_output_matrix, derivate_output);
             for (int d = 0; d < OUTPUT_NEURON; d++)
             {
@@ -165,11 +167,11 @@ int main()
             free(expected_output_array);
         }
         printf("*************** EPOCH %d *************\n", j);
-        printf("Error: %f\n", -(1.0 / TEST_SET_SIZE) * error);
+        printf("Error: %f\n", -error);
         error = 0.0;
         // update bias weight
-        matrix_multiply_constant(error_weight_gradient_bias_output, -(1.0 / TRAINING_SET_SIZE) * learning_rate);
-        matrix_multiply_constant(error_weight_gradient_bias_hidden, -(1.0 / TRAINING_SET_SIZE) * learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_output, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_hidden, learning_rate);
 
         matrix_multiply_constant(error_weight_gradient_bias_output_previous_step, alpha);
         matrix_multiply_constant(error_weight_gradient_bias_hidden_previous_step, alpha);
@@ -187,8 +189,8 @@ int main()
         matrix_reset(error_weight_gradient_bias_hidden);
         // update weight
 
-        matrix_multiply_constant(error_weight_gradient_output, -(1.0 / TRAINING_SET_SIZE) * learning_rate);
-        matrix_multiply_constant(error_weight_gradient_hidden, -(1.0 / TRAINING_SET_SIZE) * learning_rate);
+        matrix_multiply_constant(error_weight_gradient_output, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_hidden, learning_rate);
 
         matrix_multiply_constant(error_weight_gradient_output_previous_step, alpha);
         matrix_multiply_constant(error_weight_gradient_hidden_previous_step, alpha);
