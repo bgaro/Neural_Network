@@ -50,6 +50,20 @@ void matrix_print(matrix_t *m)
     }
 }
 
+void matrix_hadamard(matrix_t *m_1, matrix_t *m_2, matrix_t *m_h)
+{
+    if (m_1->rows != m_2->rows || m_1->cols != m_2->cols || m_1->rows != m_h->rows || m_1->cols != m_h->cols)
+
+    {
+        printf("Error: matrix_hadamard: matrices have different dimensions\n");
+        return;
+    }
+    for (int i = 0; i < (m_1->rows * m_1->cols); i++)
+    {
+        m_h->data[i] = m_1->data[i] * m_2->data[i];
+    }
+}
+
 void matrix_reset(matrix_t *m)
 {
     if (m == NULL)

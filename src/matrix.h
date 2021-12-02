@@ -45,6 +45,7 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul);
  * */
 void matrix_add(matrix_t *m1, matrix_t *m2);
 
+void matrix_hadamard(matrix_t *m_1, matrix_t *m_2, matrix_t *m_h);
 /**
  * @brief reset matrix m to 0
  * @param m The first matrix.
