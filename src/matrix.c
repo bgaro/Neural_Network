@@ -155,7 +155,7 @@ void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal)
         printf("Error: Matrix dimensions do not match\n");
         return;
     }
-
+    matrix_reset(m_diagonal);
     for (int i = 0; i < m->rows; i++)
     {
         m_diagonal->data[i * m_diagonal->cols + i] = m->data[i];
