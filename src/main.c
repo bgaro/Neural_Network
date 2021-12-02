@@ -11,10 +11,10 @@
 #define HIDDEN_NEURON_4 90
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 3
-#define TRAINING_SET_SIZE 1
-#define TEST_SET_SIZE 1
+#define TRAINING_SET_SIZE 10000
+#define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 1
+#define EPOCH 50
 
 int main()
 {
@@ -34,7 +34,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.5;
+    float learning_rate = -0.2;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -84,6 +84,7 @@ int main()
     matrix_t *activation_hidden_3_matrix_transpose = matrix_create(1, HIDDEN_NEURON_3);
 
     matrix_t *activation_hidden_4_matrix = matrix_create(HIDDEN_NEURON_4, 1);
+    matrix_t *activation_hidden_4_matrix_transpose = matrix_create(1, HIDDEN_NEURON_4);
 
     matrix_t *activation_output_matrix = matrix_create(OUTPUT_NEURON, 1);
 
@@ -91,8 +92,7 @@ int main()
 
     matrix_t *expected_output = matrix_create(1, OUTPUT_NEURON);
     matrix_t *derivate_error_output_layer = matrix_create(OUTPUT_NEURON, 1);
-    matrix_t *derivate_error_output_layer_transpose = matrix_create(1, OUTPUT_NEURON);
-    matrix_t *derivate_error_activation_output = matrix_create(1, OUTPUT_NEURON);
+    matrix_t *derivate_error_activation_output = matrix_create(OUTPUT_NEURON, 1);
 
     matrix_t *derivate_output = matrix_create(OUTPUT_NEURON, 1);
     matrix_t *derivate_output_diag = matrix_create(OUTPUT_NEURON, OUTPUT_NEURON);
@@ -134,16 +134,19 @@ int main()
 
     matrix_t *derivate_hidden_4 = matrix_create(HIDDEN_NEURON_4, 1);
     matrix_t *derivate_hidden_4_activation = matrix_create(HIDDEN_NEURON_4, 1);
+    matrix_t *derivate_hidden_4_activation_transpose = matrix_create(1, HIDDEN_NEURON_4);
     matrix_t *derivate_hidden_4_diag = matrix_create(HIDDEN_NEURON_4, HIDDEN_NEURON_4);
     matrix_t *derivate_hidden_4_error = matrix_create(HIDDEN_NEURON_4, 1);
 
     matrix_t *derivate_hidden_3 = matrix_create(HIDDEN_NEURON_3, 1);
     matrix_t *derivate_hidden_3_activation = matrix_create(HIDDEN_NEURON_3, 1);
+    matrix_t *derivate_hidden_3_activation_transpose = matrix_create(1, HIDDEN_NEURON_3);
     matrix_t *derivate_hidden_3_diag = matrix_create(HIDDEN_NEURON_3, HIDDEN_NEURON_3);
     matrix_t *derivate_hidden_3_error = matrix_create(HIDDEN_NEURON_3, 1);
 
     matrix_t *derivate_hidden_2 = matrix_create(HIDDEN_NEURON_2, 1);
     matrix_t *derivate_hidden_2_activation = matrix_create(HIDDEN_NEURON_2, 1);
+    matrix_t *derivate_hidden_2_activation_transpose = matrix_create(1, HIDDEN_NEURON_2);
     matrix_t *derivate_hidden_2_diag = matrix_create(HIDDEN_NEURON_2, HIDDEN_NEURON_2);
     matrix_t *derivate_hidden_2_error = matrix_create(HIDDEN_NEURON_2, 1);
 
@@ -203,117 +206,67 @@ int main()
             // matrix_initialize(expected_output_step, expected_output_step->rows, expected_output_step->cols, &expected_output->data[i][0]);
             expected_output_array = csv_to_array_labels(train_labels_stream);
             matrix_initialize(expected_output, expected_output->rows, expected_output->cols, expected_output_array);
-
             matrix_transpose(expected_output, derivate_error_output_layer);
             matrix_subtract(derivate_error_output_layer, activation_output_matrix);
             matrix_multiply_constant(derivate_error_output_layer, -1.0);
-            printf("\n");
-            matrix_print(activation_output_matrix);
-            printf("\n");
-            matrix_print(expected_output);
-            printf("\n");
-            matrix_print(derivate_error_output_layer);
+            softmax_derivate(activation_output_matrix, derivate_output);
 
             // dEk/dyj for j in Y (output layer)
 
             // dEk/dyj for j in Z \ (Y U X) (hidden layer 4)
-
-            softmax_derivate(activation_output_matrix, derivate_output);
-            matrix_diagonalize(derivate_output, derivate_output_diag);
-            matrix_multiply(derivate_output_diag, derivate_error_output_layer, derivate_output_activiation); // dEk/dyr * sigma'r(xi r) for r in j->
-            matrix_transpose(weight_hidden_4_output, weight_hidden_4_output_transpose);
-            matrix_multiply(weight_hidden_4_output_transpose, derivate_output_activiation, derivate_error_hidden_4_layer); // dEk/dyj
-            matrix_transpose(derivate_error_hidden_4_layer, derivate_error_hidden_4_layer_transpose);
+            backward_propagation_neurons(derivate_error_output_layer, derivate_output, derivate_output_diag, derivate_output_activiation, derivate_output_activiation_transpose, weight_hidden_4_output, derivate_error_hidden_4_layer_transpose, derivate_error_hidden_4_layer);
 
             // dEk/dwij for j in Y(output layer)
 
-            matrix_transpose(derivate_error_output_layer, derivate_error_output_layer_transpose);
-            matrix_multiply(derivate_error_output_layer_transpose, derivate_output_diag, derivate_error_activation_output); // dEk/dyr * sigma'r(xi r) for r in j->
-            matrix_multiply(activation_hidden_4_matrix, derivate_error_activation_output, error_weight_gradient_output_step_transpose);
-            matrix_transpose(error_weight_gradient_output_step_transpose, error_weight_gradient_output_step); // transpose so it is of the form of weight matrix
-            matrix_add(error_weight_gradient_output, error_weight_gradient_output_step);                      // sum of each training set
+            backward_propagation_weights(derivate_error_output_layer, derivate_output, derivate_output_diag, derivate_error_activation_output, activation_hidden_4_matrix, activation_hidden_4_matrix_transpose, error_weight_gradient_output_step);
+            matrix_add(error_weight_gradient_output, error_weight_gradient_output_step); // sum of each training set
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 4
 
             reLU_derivate(hidden_layer_4, derivate_hidden_4);
-            matrix_diagonalize(derivate_hidden_4, derivate_hidden_4_diag);
-            matrix_multiply(derivate_hidden_4_diag, derivate_error_hidden_4_layer, derivate_hidden_4_error);
-            matrix_transpose(activation_hidden_3_matrix, activation_hidden_3_matrix_transpose);
-            matrix_multiply(derivate_hidden_4_error, activation_hidden_3_matrix_transpose, error_weight_gradient_hidden_4_step);
+            backward_propagation_weights(derivate_error_hidden_4_layer, derivate_hidden_4, derivate_hidden_4_diag, derivate_hidden_4_error, activation_hidden_3_matrix, activation_hidden_3_matrix_transpose, error_weight_gradient_hidden_4_step);
             matrix_add(error_weight_gradient_hidden_4, error_weight_gradient_hidden_4_step);
 
             // dEk/dyj for j in Z \ (Y U X) (hidden layer 3)
-
-            matrix_multiply(derivate_hidden_4_diag, derivate_error_hidden_4_layer, derivate_hidden_4_activation); // dEk/dyr * sigma'r(xi r) for r in j->
-            matrix_transpose(weight_input_hidden_4, weight_input_hidden_4_transpose);
-            matrix_multiply(weight_input_hidden_4_transpose, derivate_hidden_4_activation, derivate_error_hidden_3_layer); // dEk/dyj
-            matrix_transpose(derivate_error_hidden_3_layer, derivate_error_hidden_3_layer_transpose);
+            backward_propagation_neurons(derivate_error_hidden_4_layer, derivate_hidden_4, derivate_hidden_4_diag, derivate_hidden_4_activation, derivate_hidden_4_activation_transpose, weight_input_hidden_4, derivate_error_hidden_3_layer_transpose, derivate_error_hidden_3_layer);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 3
             reLU_derivate(hidden_layer_3, derivate_hidden_3);
-            matrix_diagonalize(derivate_hidden_3, derivate_hidden_3_diag);
-            matrix_multiply(derivate_hidden_3_diag, derivate_error_hidden_3_layer, derivate_hidden_3_error);
-            matrix_transpose(activation_hidden_2_matrix, activation_hidden_2_matrix_transpose);
-            matrix_multiply(derivate_hidden_3_error, activation_hidden_2_matrix_transpose, error_weight_gradient_hidden_3_step);
+            backward_propagation_weights(derivate_error_hidden_3_layer, derivate_hidden_3, derivate_hidden_3_diag, derivate_hidden_3_error, activation_hidden_2_matrix, activation_hidden_2_matrix_transpose, error_weight_gradient_hidden_3_step);
             matrix_add(error_weight_gradient_hidden_3, error_weight_gradient_hidden_3_step);
 
             // dEK/dyj for j in Z \ (Y U X) (hidden layer 2)
-
-            matrix_multiply(derivate_hidden_3_diag, derivate_error_hidden_3_layer, derivate_hidden_3_activation);
-            matrix_transpose(weight_input_hidden_3, weight_input_hidden_3_transpose);
-            matrix_multiply(weight_input_hidden_3_transpose, derivate_hidden_3_activation, derivate_error_hidden_2_layer); // dEk/dyj
-            matrix_transpose(derivate_error_hidden_2_layer, derivate_error_hidden_2_layer_transpose);
+            backward_propagation_neurons(derivate_error_hidden_3_layer, derivate_hidden_3, derivate_hidden_3_diag, derivate_hidden_3_activation, derivate_hidden_3_activation_transpose, weight_input_hidden_3, derivate_error_hidden_2_layer_transpose, derivate_error_hidden_2_layer);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 2
             reLU_derivate(hidden_layer_2, derivate_hidden_2);
-            matrix_diagonalize(derivate_hidden_2, derivate_hidden_2_diag);
-            matrix_multiply(derivate_hidden_2_diag, derivate_error_hidden_2_layer, derivate_hidden_2_error);
-            matrix_transpose(activation_hidden_1_matrix, activation_hidden_1_matrix_transpose);
-            matrix_multiply(derivate_hidden_2_error, activation_hidden_1_matrix_transpose, error_weight_gradient_hidden_2_step);
+            backward_propagation_weights(derivate_error_hidden_2_layer, derivate_hidden_2, derivate_hidden_2_diag, derivate_hidden_2_error, activation_hidden_1_matrix, activation_hidden_1_matrix_transpose, error_weight_gradient_hidden_2_step);
             matrix_add(error_weight_gradient_hidden_2, error_weight_gradient_hidden_2_step);
 
             // dEK/dyj for j in Z \ (Y U X) (hidden layer 1)
 
-            matrix_multiply(derivate_hidden_2_diag, derivate_error_hidden_2_layer, derivate_hidden_2_activation);
-            matrix_transpose(weight_input_hidden_2, weight_input_hidden_2_transpose);
-            matrix_multiply(weight_input_hidden_2_transpose, derivate_hidden_2_activation, derivate_error_hidden_1_layer); // dEk/dyj
-            matrix_transpose(derivate_error_hidden_1_layer, derivate_error_hidden_1_layer_transpose);
+            backward_propagation_neurons(derivate_error_hidden_2_layer, derivate_hidden_2, derivate_hidden_2_diag, derivate_hidden_2_activation, derivate_hidden_2_activation_transpose, weight_input_hidden_2, derivate_error_hidden_1_layer_transpose, derivate_error_hidden_1_layer);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 1
             reLU_derivate(hidden_layer_1, derivate_hidden_1);
-            matrix_diagonalize(derivate_hidden_1, derivate_hidden_1_diag);
-            matrix_multiply(derivate_hidden_1_diag, derivate_error_hidden_1_layer, derivate_hidden_1_error);
-            matrix_transpose(activation_input_matrix, activation_input_matrix_transpose);
-            matrix_multiply(derivate_hidden_1_error, activation_input_matrix_transpose, error_weight_gradient_hidden_1_step);
+            backward_propagation_weights(derivate_error_hidden_1_layer, derivate_hidden_1, derivate_hidden_1_diag, derivate_hidden_1_error, input_layer, input_layer_transpose, error_weight_gradient_hidden_1_step);
             matrix_add(error_weight_gradient_hidden_1, error_weight_gradient_hidden_1_step);
 
             // bias of hidden layer 4 update
-
-            matrix_diagonalize(derivate_hidden_4_activation, derivate_error_hidden_4_layer_diag);
-            matrix_multiply(derivate_error_hidden_4_layer_diag, bias_hidden_4, error_weight_gradient_bias_hidden_4_step);
-            matrix_add(error_weight_gradient_bias_hidden_4, error_weight_gradient_bias_hidden_4_step);
+            matrix_add(error_weight_gradient_bias_hidden_4, derivate_hidden_4_error);
 
             // bias of hidden layer 3 update
-            matrix_diagonalize(derivate_hidden_3_activation, derivate_error_hidden_3_layer_diag);
-            matrix_multiply(derivate_error_hidden_3_layer_diag, bias_hidden_3, error_weight_gradient_bias_hidden_3_step);
-            matrix_add(error_weight_gradient_bias_hidden_3, error_weight_gradient_bias_hidden_3_step);
+            matrix_add(error_weight_gradient_bias_hidden_3, derivate_hidden_3_error);
 
             // bias of hidden layer 2 update
-            matrix_diagonalize(derivate_hidden_2_activation, derivate_error_hidden_2_layer_diag);
-            matrix_multiply(derivate_error_hidden_2_layer_diag, bias_hidden_2, error_weight_gradient_bias_hidden_2_step);
-            matrix_add(error_weight_gradient_bias_hidden_2, error_weight_gradient_bias_hidden_2_step);
+            matrix_add(error_weight_gradient_bias_hidden_2, derivate_hidden_2_error);
 
             // bias of hidden layer 1 update
-            matrix_diagonalize(derivate_hidden_1_error, derivate_error_hidden_1_layer_diag);
-            matrix_multiply(derivate_error_hidden_1_layer_diag, bias_hidden_1, error_weight_gradient_bias_hidden_1_step);
-            matrix_add(error_weight_gradient_bias_hidden_1, error_weight_gradient_bias_hidden_1_step);
+            matrix_add(error_weight_gradient_bias_hidden_1, derivate_hidden_1_error);
 
             // bias of output layer update
 
-            matrix_diagonalize(derivate_output_activiation, derivate_error_output_layer_diag);
-            matrix_multiply(derivate_error_output_layer_diag, bias_output, error_weight_gradient_bias_output_step); // dek/dwij
-            matrix_add(error_weight_gradient_bias_output, error_weight_gradient_bias_output_step);
-
+            matrix_add(error_weight_gradient_bias_output, derivate_error_activation_output);
             // free memory
             free(expected_output_array[0]);
             free(expected_output_array);
@@ -379,29 +332,19 @@ int main()
         matrix_transpose(input_layer_transpose, input_layer);
 
         // feed forward on hidden layer 1
-        matrix_multiply(weight_input_hidden_1, input_layer, hidden_layer_1);
-        matrix_add(hidden_layer_1, bias_hidden_1);
-        reLU(hidden_layer_1, activation_hidden_1_matrix);
+        feed_forward(weight_input_hidden_1, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU);
 
         // feed forward on hidden layer 2
-        matrix_multiply(weight_input_hidden_2, hidden_layer_1, hidden_layer_2);
-        matrix_add(hidden_layer_2, bias_hidden_2);
-        reLU(hidden_layer_2, activation_hidden_2_matrix);
+        feed_forward(weight_input_hidden_2, activation_hidden_1_matrix, bias_hidden_2, hidden_layer_2, activation_hidden_2_matrix, reLU);
 
         // feed forward on hidden layer 3
-        matrix_multiply(weight_input_hidden_3, hidden_layer_2, hidden_layer_3);
-        matrix_add(hidden_layer_3, bias_hidden_3);
-        reLU(hidden_layer_3, activation_hidden_3_matrix);
+        feed_forward(weight_input_hidden_3, activation_hidden_2_matrix, bias_hidden_3, hidden_layer_3, activation_hidden_3_matrix, reLU);
 
         // feed forward on hidden layer 4
-        matrix_multiply(weight_input_hidden_4, hidden_layer_3, hidden_layer_4);
-        matrix_add(hidden_layer_4, bias_hidden_4);
-        reLU(hidden_layer_4, activation_hidden_4_matrix);
+        feed_forward(weight_input_hidden_4, activation_hidden_3_matrix, bias_hidden_4, hidden_layer_4, activation_hidden_4_matrix, reLU);
 
         // feed forward on output layer
-        matrix_multiply(weight_hidden_4_output, activation_hidden_4_matrix, output_layer);
-        matrix_add(output_layer, bias_output);
-        softmax(output_layer, activation_output_matrix);
+        feed_forward(weight_hidden_4_output, activation_hidden_4_matrix, bias_output, output_layer, activation_output_matrix, softmax);
 
         matrix_print(output_layer);
 

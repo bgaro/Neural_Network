@@ -105,6 +105,7 @@ void matrix_transpose(matrix_t *m, matrix_t *m_transpose)
         printf("Error: Matrix dimensions do not match\n");
         return;
     }
+    matrix_reset(m_transpose);
     for (int i = 0; i < m->rows; i++)
     {
         for (int j = 0; j < m->cols; j++)
