@@ -54,7 +54,7 @@ void reLU(matrix_t *m, matrix_t *m_d)
     for (int i = 0; i < m->rows * m->cols; i++)
     {
 
-        m_d->data[i] = (m->data[i] >= 0) ? m->data[i] : 0.01 * m->data[i];
+        m_d->data[i] = (m->data[i] >= 0) ? m->data[i] : 0;
     }
 }
 
@@ -107,6 +107,6 @@ void reLU_derivate(matrix_t *m, matrix_t *m_d)
     for (int i = 0; i < m->rows * m->cols; i++)
     {
 
-        m_d->data[i] = (m->data[i] >= 0) ? 1 : 0.01;
+        m_d->data[i] = (m->data[i] >= 0) ? 1 : 0;
     }
 }

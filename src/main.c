@@ -47,16 +47,11 @@ int main()
     matrix_t *output_layer = matrix_create(OUTPUT_NEURON, 1);
 
     matrix_t *bias_hidden_1 = matrix_create(HIDDEN_NEURON_1, 1);
-    matrix_initialize_to_value(bias_hidden_1, 0.01);
     matrix_t *bias_hidden_2 = matrix_create(HIDDEN_NEURON_2, 1);
-    matrix_initialize_to_value(bias_hidden_2, 0.01);
     matrix_t *bias_hidden_3 = matrix_create(HIDDEN_NEURON_3, 1);
-    matrix_initialize_to_value(bias_hidden_3, 0.01);
     matrix_t *bias_hidden_4 = matrix_create(HIDDEN_NEURON_4, 1);
-    matrix_initialize_to_value(bias_hidden_4, 0.01);
 
     matrix_t *bias_output = matrix_create(OUTPUT_NEURON, 1);
-    matrix_initialize_to_value(bias_output, 0.01);
 
     matrix_t *weight_input_hidden_1 = matrix_create(HIDDEN_NEURON_1, INPUT_NEURON);
     matrix_t *weight_input_hidden_1_transpose = matrix_create(INPUT_NEURON, HIDDEN_NEURON_1);
