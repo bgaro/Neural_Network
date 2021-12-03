@@ -33,7 +33,9 @@ void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *
 void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *derivate_error_activation_transpose, matrix_t *weights, matrix_t *derivate_error_output_transpose, matrix_t *derivate_error_output, int activation)
 {
     if (activation == RELU)
+    
         matrix_hadamard(derivate_activation, derivate_error, derivate_error_activation);
+    
     else if (activation == SOFTMAX)
         matrix_multiply(derivate_activation, derivate_error, derivate_error_activation);
     matrix_transpose(derivate_error_activation, derivate_error_activation_transpose);
