@@ -8,14 +8,14 @@
 #include "neural_network.h"
 
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON 50
-#define HIDDEN_NEURON_1 50
+#define HIDDEN_NEURON 100
+#define HIDDEN_NEURON_1 100
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 1000
+#define TRAINING_SET_SIZE 10000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 50
+#define EPOCH 100
 int main()
 {
     srand(time(NULL));
@@ -34,7 +34,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.15;
+    float learning_rate = -0.17;
     float alpha = 0.9;
     float error = 0.0;
     int test = 0;
@@ -296,8 +296,6 @@ int main()
         test = csv_to_array_labels_int(train_labels_stream);
         if (get_label(activation_output_matrix) == test)
             cpt++;
-        else
-            printf("%d %d\n", test, get_label(activation_output_matrix));
     }
     printf("%d / %d\n", cpt, TEST_SET_SIZE);
     fclose(train_vectors_stream);
