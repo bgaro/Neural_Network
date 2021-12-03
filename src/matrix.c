@@ -97,7 +97,7 @@ void matrix_add(matrix_t *m1, matrix_t *m2)
     }
     if ((m1->rows != m2->rows) || (m1->cols != m2->cols))
     {
-        printf("Error: Matrix dimensions do not match\n");
+        printf("Error matrix_add : Matrix dimensions do not match\n");
         return;
     }
     for (int i = 0; i < m1->rows * m1->cols; i++)
@@ -116,7 +116,7 @@ void matrix_transpose(matrix_t *m, matrix_t *m_transpose)
     }
     if ((m->rows != m_transpose->cols) || (m->cols != m_transpose->rows))
     {
-        printf("Error: Matrix dimensions do not match\n");
+        printf("Error matrix_transpose : Matrix dimensions do not match\n");
         return;
     }
     matrix_reset(m_transpose);
@@ -167,7 +167,7 @@ void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal)
     }
     if ((m->rows != m_diagonal->rows) || (m->cols != 1))
     {
-        printf("Error: Matrix dimensions do not match\n");
+        printf("Error matrix_diagonalize : Matrix dimensions do not match\n");
         return;
     }
     matrix_reset(m_diagonal);
@@ -182,12 +182,12 @@ void matrix_initialize(matrix_t *m, int rows, int cols, float **array)
 {
     if (m == NULL || array == NULL)
     {
-        printf("Error matrix_initize, matrix doesn't exists\n");
+        printf("Error matrix_initialize, matrix doesn't exists\n");
         return;
     }
     if (rows != m->rows || cols != m->cols)
     {
-        printf("Error: Matrix dimensions do not match\n");
+        printf("Error matrix_initialize: Matrix dimensions do not match\n");
         return;
     }
     for (int i = 0; i < m->rows; i++)
@@ -208,7 +208,7 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul)
     }
     if ((m1->cols != m2->rows) || (m1->rows != m_mul->rows) || (m2->cols != m_mul->cols))
     {
-        printf("Error: Matrix dimensions do not match\n");
+        printf("Error matrix_multiply : Matrix dimensions do not match\n");
         return;
     }
     matrix_reset(m_mul);
@@ -248,7 +248,7 @@ void matrix_subtract(matrix_t *m1, matrix_t *m2)
     }
     if (m1->rows != m2->rows || m1->cols != m2->cols)
     {
-        printf("Error: Matrix dimensions do not match\n");
+        printf("Error matrix_subtract : Matrix dimensions do not match\n");
         return;
     }
     for (int i = 0; i < m1->rows * m2->cols; i++)

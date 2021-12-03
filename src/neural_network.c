@@ -2,6 +2,9 @@
 #include "matrix.h"
 #include "activation.h"
 
+#define SOFTMAX 0
+#define RELU 1
+
 // Feed forward
 
 void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *output, matrix_t *activation_output, void (*activation_function)(matrix_t *, matrix_t *))
@@ -27,17 +30,23 @@ void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *
     activation_function(output, activation_output);
 }
 
-void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *derivate_error_activation_transpose, matrix_t *weights, matrix_t *derivate_error_output_transpose, matrix_t *derivate_error_output)
+void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *derivate_error_activation_transpose, matrix_t *weights, matrix_t *derivate_error_output_transpose, matrix_t *derivate_error_output, int activation)
 {
-    matrix_hadamard(derivate_activation, derivate_error, derivate_error_activation);
+    if (activation == RELU)
+        matrix_hadamard(derivate_activation, derivate_error, derivate_error_activation);
+    else if (activation == SOFTMAX)
+        matrix_multiply(derivate_activation, derivate_error, derivate_error_activation);
     matrix_transpose(derivate_error_activation, derivate_error_activation_transpose);
     matrix_multiply(derivate_error_activation_transpose, weights, derivate_error_output_transpose);
     matrix_transpose(derivate_error_output_transpose, derivate_error_output);
 }
 
-void backward_propagation_weights(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *activation_layer, matrix_t *activation_layer_transpose, matrix_t *weight_derivate_output)
+void backward_propagation_weights(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *activation_layer, matrix_t *activation_layer_transpose, matrix_t *weight_derivate_output, int activation)
 {
-    matrix_hadamard(derivate_error, derivate_activation, derivate_error_activation);
+    if (activation == RELU)
+        matrix_hadamard(derivate_error, derivate_activation, derivate_error_activation);
+    else if (activation == SOFTMAX)
+        matrix_multiply(derivate_activation, derivate_error, derivate_error_activation);
     matrix_transpose(activation_layer, activation_layer_transpose);
     matrix_multiply(derivate_error_activation, activation_layer_transpose, weight_derivate_output);
 }

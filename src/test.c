@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "matrix.h"
+#include "activation.h"
 
 int main()
 {
@@ -10,22 +11,17 @@ int main()
     float **data = malloc(sizeof(float *) * 3);
     for (int i = 0; i < 3; i++)
     {
-        data[i] = malloc(sizeof(float) * 1);
-        for (int j = 0; j < 2; j++)
+        data[i] = malloc(sizeof(float));
+        for (int j = 0; j < 1; j++)
         {
-            data[i][j] = i + j;
+            data[i][j] = i + j + 1;
         }
     }
-    matrix_initialize(matrix, 3, 1, data);
-    matrix_transpose(matrix, matrix2);
-    matrix_multiply(matrix, matrix2, matrix3);
-    matrix_print(matrix2);
-    printf("\n");
-    matrix_print(matrix);
-    printf("\n");
 
-    matrix_multiply_constant(matrix3, 2);
-    matrix_subtract(matrix3, matrix3);
+    matrix_initialize(matrix, 3, 1, data);
+    printf("test\n");
+    softmax_derivate(matrix, matrix3);
     matrix_print(matrix3);
+
     return 0;
 }
