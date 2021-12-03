@@ -8,8 +8,8 @@
 #include "neural_network.h"
 
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON 100
-#define HIDDEN_NEURON_1 100
+#define HIDDEN_NEURON 80
+#define HIDDEN_NEURON_1 70
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
 #define TRAINING_SET_SIZE 10000
@@ -113,6 +113,7 @@ int main()
 
     matrix_t *derivate_hidden = matrix_create(HIDDEN_NEURON, 1);
     matrix_t *derivate_hidden_activation = matrix_create(HIDDEN_NEURON, 1);
+    matrix_t *derivate_hidden_activation_transpose = matrix_create(1, HIDDEN_NEURON);
 
     matrix_t *derivate_hidden_1_activation = matrix_create(HIDDEN_NEURON_1, 1);
 
@@ -174,7 +175,8 @@ int main()
             backward_propagation_neurons(derivate_error_output_layer, derivate_output, derivate_output_activiation, derivate_output_activiation_transpose, weight_hidden_output, derivate_error_hidden_layer_transpose, derivate_error_hidden_layer, SOFTMAX);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 3
-            backward_propagation_neurons(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_1_activation, derivate_hidden_1_activiation_transpose, weight_hidden_hidden, derivate_error_hidden_layer_1_transpose, derivate_error_hidden_layer_1, RELU);
+            reLU_derivate(hidden_layer, derivate_hidden);
+            backward_propagation_neurons(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_activation, derivate_hidden_activation_transpose, weight_hidden_hidden, derivate_error_hidden_layer_1_transpose, derivate_error_hidden_layer_1, RELU);
 
             // dEk/dwij for j in Y(output layer)
 
@@ -183,7 +185,6 @@ int main()
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 4
 
-            reLU_derivate(hidden_layer, derivate_hidden);
             backward_propagation_weights(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_error, activation_hidden_1_matrix, activation_hidden_1_matrix_transpose, error_weight_gradient_hidden_step, RELU);
             matrix_add(error_weight_gradient_hidden, error_weight_gradient_hidden_step);
 
