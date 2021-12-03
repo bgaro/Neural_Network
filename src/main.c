@@ -12,8 +12,8 @@
 #define HIDDEN_NEURON_1 50
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 60000
-#define TEST_SET_SIZE 2000
+#define TRAINING_SET_SIZE 1000
+#define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
 #define EPOCH 50
 int main()
@@ -137,7 +137,6 @@ int main()
             // Feed forward process
 
             // initialisation of input layer
-
             input_array = csv_to_array_vectors(train_vectors_stream);
             matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array);
             matrix_transpose(input_layer_transpose, input_layer);
@@ -268,6 +267,7 @@ int main()
     fclose(train_labels_stream);
 
     train_vectors_stream = fopen("./data/fashion_mnist_test_vectors.csv", "r");
+
     train_labels_stream = fopen("./data/fashion_mnist_test_labels.csv", "r");
     for (int i = 0; i < TEST_SET_SIZE; i++)
     {
@@ -279,9 +279,6 @@ int main()
         input_array = csv_to_array_vectors(train_vectors_stream);
         matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array);
         matrix_transpose(input_layer_transpose, input_layer);
-
-        /*if (i == 3000)
-            fseek(train_labels_stream, -2, SEEK_CUR);*/
 
         // feed forward on hidden layer 1
         feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU);

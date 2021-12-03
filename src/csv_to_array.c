@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "matrix.h"
 
-#define MAX_TRAIN_VECTORS_LENGTH 2968 // Tests have been made
+#define MAX_TRAIN_VECTORS_LENGTH 3135 // Tests have been made
 #define IMAGE_SIZE 784                // Images 28*28
 
 float **csv_to_array_vectors(FILE *train_vectors_stream)
@@ -14,13 +14,13 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
     char *train_vectors;
 
     char *train_vectors_string;
-    train_vectors_string = malloc(sizeof(char) * MAX_TRAIN_VECTORS_LENGTH);
+    train_vectors_string = malloc(sizeof(char) * MAX_TRAIN_VECTORS_LENGTH + 1);
     float **train_vectors_array;
     train_vectors_array = malloc(sizeof(float *));
     train_vectors_array[0] = calloc(sizeof(float), IMAGE_SIZE);
 
     /* Reading the whole csv line by line */
-    if ((fgets(train_vectors_string, MAX_TRAIN_VECTORS_LENGTH, train_vectors_stream)) != NULL)
+    if ((fgets(train_vectors_string, MAX_TRAIN_VECTORS_LENGTH + 1, train_vectors_stream)) != NULL)
     {
 
         train_vectors = strtok(train_vectors_string, ",");
@@ -49,9 +49,9 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
         printf("\n\n\n\n\n");
         cpt += 1;*/
         free(train_vectors_string);
-        fseek(train_vectors_stream, 1, SEEK_CUR);
         return train_vectors_array;
     }
+    printf("yest\n");
     return NULL;
 }
 
