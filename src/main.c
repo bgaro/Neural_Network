@@ -8,11 +8,11 @@
 #include "neural_network.h"
 
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON 110
-#define HIDDEN_NEURON_1 90
+#define HIDDEN_NEURON 100
+#define HIDDEN_NEURON_1 100
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 1000
+#define TRAINING_SET_SIZE 10000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
 #define EPOCH 100
@@ -34,7 +34,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = 0.14;
+    float learning_rate = -0.17;
     float alpha = 0.9;
     float error = 0.0;
     int test = 0;
@@ -81,6 +81,7 @@ int main()
     matrix_t *derivate_error_output_layer_diag = matrix_create(OUTPUT_NEURON, OUTPUT_NEURON);
     matrix_t *derivate_output_activiation = matrix_create(OUTPUT_NEURON, 1);
     matrix_t *derivate_output_activiation_transpose = matrix_create(1, OUTPUT_NEURON);
+    matrix_t *derivate_hidden_1_activiation_transpose = matrix_create(1, HIDDEN_NEURON_1);
 
     matrix_t *derivate_error_hidden_layer = matrix_create(HIDDEN_NEURON, 1);
     matrix_t *derivate_error_hidden_layer_transpose = matrix_create(1, HIDDEN_NEURON);
@@ -112,7 +113,6 @@ int main()
 
     matrix_t *derivate_hidden = matrix_create(HIDDEN_NEURON, 1);
     matrix_t *derivate_hidden_activation = matrix_create(HIDDEN_NEURON, 1);
-    matrix_t *derivate_hidden_activation_transpose = matrix_create(1, HIDDEN_NEURON);
 
     matrix_t *derivate_hidden_1_activation = matrix_create(HIDDEN_NEURON_1, 1);
 
@@ -174,8 +174,7 @@ int main()
             backward_propagation_neurons(derivate_error_output_layer, derivate_output, derivate_output_activiation, derivate_output_activiation_transpose, weight_hidden_output, derivate_error_hidden_layer_transpose, derivate_error_hidden_layer, SOFTMAX);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 3
-            reLU_derivate(hidden_layer, derivate_hidden);
-            backward_propagation_neurons(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_activation, derivate_hidden_activation_transpose, weight_hidden_hidden, derivate_error_hidden_layer_1_transpose, derivate_error_hidden_layer_1, RELU);
+            backward_propagation_neurons(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_1_activation, derivate_hidden_1_activiation_transpose, weight_hidden_hidden, derivate_error_hidden_layer_1_transpose, derivate_error_hidden_layer_1, RELU);
 
             // dEk/dwij for j in Y(output layer)
 
@@ -184,6 +183,7 @@ int main()
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 4
 
+            reLU_derivate(hidden_layer, derivate_hidden);
             backward_propagation_weights(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_error, activation_hidden_1_matrix, activation_hidden_1_matrix_transpose, error_weight_gradient_hidden_step, RELU);
             matrix_add(error_weight_gradient_hidden, error_weight_gradient_hidden_step);
 
@@ -209,9 +209,9 @@ int main()
         printf("Error: %f\n", -error);
         error = 0.0;
         // update bias weight
-        matrix_multiply_constant(error_weight_gradient_bias_output, -learning_rate);
-        matrix_multiply_constant(error_weight_gradient_bias_hidden, -learning_rate);
-        matrix_multiply_constant(error_weight_gradient_bias_hidden_1, -learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_output, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_hidden, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_hidden_1, learning_rate);
 
         matrix_multiply_constant(error_weight_gradient_bias_output_previous_step, alpha);
         matrix_multiply_constant(error_weight_gradient_bias_hidden_previous_step, alpha);
@@ -235,9 +235,9 @@ int main()
 
         // update weight
 
-        matrix_multiply_constant(error_weight_gradient_output, -learning_rate);
-        matrix_multiply_constant(error_weight_gradient_hidden, -learning_rate);
-        matrix_multiply_constant(error_weight_gradient_hidden_1, -learning_rate);
+        matrix_multiply_constant(error_weight_gradient_output, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_hidden, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_hidden_1, learning_rate);
 
         matrix_multiply_constant(error_weight_gradient_output_previous_step, alpha);
         matrix_multiply_constant(error_weight_gradient_hidden_previous_step, alpha);
@@ -258,7 +258,6 @@ int main()
         matrix_reset(error_weight_gradient_output);
         matrix_reset(error_weight_gradient_hidden);
         matrix_reset(error_weight_gradient_hidden_1);
-        printf("Learning rate: %f\n", learning_rate);
 
         // reset file pointer
         fseek(train_vectors_stream, 0, SEEK_SET);
