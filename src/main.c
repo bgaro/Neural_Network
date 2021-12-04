@@ -8,16 +8,17 @@
 #include "neural_network.h"
 
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON 80
-#define HIDDEN_NEURON_1 70
+#define HIDDEN_NEURON_1 80
+#define HIDDEN_NEURON 160
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 10000
+#define TRAINING_SET_SIZE 5000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 100
+#define EPOCH 110
 int main()
 {
+    clock_t begin = clock();
     srand(time(NULL));
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
@@ -34,7 +35,7 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.17;
+    float learning_rate = 0.14;
     float alpha = 0.9;
     float error = 0.0;
     int test = 0;
@@ -81,7 +82,6 @@ int main()
     matrix_t *derivate_error_output_layer_diag = matrix_create(OUTPUT_NEURON, OUTPUT_NEURON);
     matrix_t *derivate_output_activiation = matrix_create(OUTPUT_NEURON, 1);
     matrix_t *derivate_output_activiation_transpose = matrix_create(1, OUTPUT_NEURON);
-    matrix_t *derivate_hidden_1_activiation_transpose = matrix_create(1, HIDDEN_NEURON_1);
 
     matrix_t *derivate_error_hidden_layer = matrix_create(HIDDEN_NEURON, 1);
     matrix_t *derivate_error_hidden_layer_transpose = matrix_create(1, HIDDEN_NEURON);
@@ -210,9 +210,9 @@ int main()
         printf("Error: %f\n", -error);
         error = 0.0;
         // update bias weight
-        matrix_multiply_constant(error_weight_gradient_bias_output, learning_rate);
-        matrix_multiply_constant(error_weight_gradient_bias_hidden, learning_rate);
-        matrix_multiply_constant(error_weight_gradient_bias_hidden_1, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_output, -learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_hidden, -learning_rate);
+        matrix_multiply_constant(error_weight_gradient_bias_hidden_1, -learning_rate);
 
         matrix_multiply_constant(error_weight_gradient_bias_output_previous_step, alpha);
         matrix_multiply_constant(error_weight_gradient_bias_hidden_previous_step, alpha);
@@ -236,9 +236,9 @@ int main()
 
         // update weight
 
-        matrix_multiply_constant(error_weight_gradient_output, learning_rate);
-        matrix_multiply_constant(error_weight_gradient_hidden, learning_rate);
-        matrix_multiply_constant(error_weight_gradient_hidden_1, learning_rate);
+        matrix_multiply_constant(error_weight_gradient_output, -learning_rate);
+        matrix_multiply_constant(error_weight_gradient_hidden, -learning_rate);
+        matrix_multiply_constant(error_weight_gradient_hidden_1, -learning_rate);
 
         matrix_multiply_constant(error_weight_gradient_output_previous_step, alpha);
         matrix_multiply_constant(error_weight_gradient_hidden_previous_step, alpha);
@@ -298,10 +298,13 @@ int main()
         if (get_label(activation_output_matrix) == test)
             cpt++;
     }
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("%d / %d\n", cpt, TEST_SET_SIZE);
     fclose(train_vectors_stream);
     fclose(train_labels_stream);
     printf("accuracy : %f percent\n", (float)cpt / (float)TEST_SET_SIZE * 100.0);
+    printf("time spent : %f minutes\n", time_spent / 60.0);
     // free block
 
     matrix_free(input_layer);
