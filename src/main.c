@@ -8,17 +8,17 @@
 #include "neural_network.h"
 
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON_4 27
-#define HIDDEN_NEURON_3 25
-#define HIDDEN_NEURON_2 30
-#define HIDDEN_NEURON_1 35
-#define HIDDEN_NEURON 40
+#define HIDDEN_NEURON_4 70
+#define HIDDEN_NEURON_3 80
+#define HIDDEN_NEURON_2 90
+#define HIDDEN_NEURON_1 80
+#define HIDDEN_NEURON 70
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 2000
+#define TRAINING_SET_SIZE 1000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 100
+#define EPOCH 200
 int main()
 {
     srand(time(NULL));
@@ -37,8 +37,8 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = -0.2;
-    float alpha = 0.9;
+    float learning_rate = -0.11;
+    float alpha = 0.91;
     float error = 0.0;
     int test = 0;
     int cpt = 0;
