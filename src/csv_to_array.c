@@ -6,21 +6,26 @@
 #define MAX_TRAIN_VECTORS_LENGTH 3135 // Tests have been made
 #define IMAGE_SIZE 784                // Images 28*28
 
-float **csv_to_array_vectors(FILE *train_vectors_stream)
+float **csv_to_array_vectors(FILE *train_vectors_stream, int size)
 {
 
     /* Initializations */
     int column = 0;
+    int row = 0;
     char *train_vectors;
 
     char *train_vectors_string;
     train_vectors_string = malloc(sizeof(char) * MAX_TRAIN_VECTORS_LENGTH + 1);
     float **train_vectors_array;
-    train_vectors_array = malloc(sizeof(float *));
-    train_vectors_array[0] = calloc(sizeof(float), IMAGE_SIZE);
+    train_vectors_array = malloc(sizeof(float *) * size);
+    for (int j = 0; j < size; j++)
+    {
+        train_vectors_array[j] = malloc(sizeof(float) * IMAGE_SIZE);
+    }
 
     /* Reading the whole csv line by line */
-    if ((fgets(train_vectors_string, MAX_TRAIN_VECTORS_LENGTH + 1, train_vectors_stream)) != NULL)
+    while (((fgets(train_vectors_string, MAX_TRAIN_VECTORS_LENGTH + 1, train_vectors_stream)) != NULL) && (row < size))
+
     {
 
         train_vectors = strtok(train_vectors_string, ",");
@@ -28,13 +33,14 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
         /* Adding properly the vector to the array of all vectors */
         while (train_vectors != NULL)
         {
-            train_vectors_array[0][column] = (float)atoi(train_vectors) / 255.0;
+            train_vectors_array[row][column] = (float)atoi(train_vectors) / 255.0;
             train_vectors = strtok(NULL, ",");
             column += 1;
         }
 
         /* Reset values to read next ones */
         column = 0;
+        row++;
 
         /* Print pictures */
         /*printf("***** IMAGE %i *****\n\n", cpt);
@@ -47,14 +53,9 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
         }
         printf("\n\n\n\n\n");
         cpt += 1;*/
-        free(train_vectors_string);
-        return train_vectors_array;
     }
-    else
-    {
-        free(train_vectors_string);
-        return NULL;
-    }
+    free(train_vectors_string);
+    return train_vectors_array;
 }
 
 int get_label(matrix_t *labels)
@@ -89,25 +90,30 @@ int csv_to_array_labels_int(FILE *train_vectors_stream)
     return -1;
 }
 
-float **csv_to_array_labels(FILE *train_vectors_stream)
+float **csv_to_array_labels(FILE *train_vectors_stream, int size)
 {
 
     /* Initializations */
     int value;
+    int row = 0;
     float **train_vectors_array;
-    train_vectors_array = malloc(sizeof(float *));
-    train_vectors_array[0] = calloc(sizeof(float), 10);
+    train_vectors_array = malloc(sizeof(float *) * size);
+    for (int j = 0; j < size; j++)
+    {
+        train_vectors_array[j] = calloc(sizeof(float), 10);
+    }
 
     /* Getting the class of each vector */
-    if ((value = fgetc(train_vectors_stream)) != EOF)
+    while (((value = fgetc(train_vectors_stream)) != EOF) && (row < size))
     {
 
         value = value - 48;
         fseek(train_vectors_stream, 1, SEEK_CUR);
         if (value < 0 || value > 9)
             return NULL;
-        train_vectors_array[0][value] = 1.0;
-        return train_vectors_array;
+        train_vectors_array[row][value] = 1.0;
+        row++;
     }
+    return train_vectors_array;
     return NULL;
 }

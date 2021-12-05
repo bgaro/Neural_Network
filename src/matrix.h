@@ -105,4 +105,4 @@ void matrix_subtract(matrix_t *m1, matrix_t *m2);
  * @param array The array of values.
  * @return void
  * */
-void matrix_initialize(matrix_t *m, int rows, int cols, float **array);
+void matrix_initialize(matrix_t *m, int rows, int cols, float *array);

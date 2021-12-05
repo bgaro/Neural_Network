@@ -15,7 +15,7 @@
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 600
+#define EPOCH 550
 int main()
 {
     clock_t begin = clock();
@@ -33,10 +33,12 @@ int main()
     }
 
     float **input_array;
+    input_array = csv_to_array_vectors(train_vectors_stream, TRAINING_SET_SIZE);
+
     float **expected_output_array;
+    expected_output_array = csv_to_array_labels(train_labels_stream, TRAINING_SET_SIZE);
     float learning_rate = 0.106748;
     float alpha = 0.96;
-    float error = 0.0;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -137,8 +139,8 @@ int main()
             // Feed forward process
 
             // initialisation of input layer
-            input_array = csv_to_array_vectors(train_vectors_stream);
-            matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array);
+
+            matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array[i]);
             matrix_transpose(input_layer_transpose, input_layer);
 
             // feed forward on hidden layer 1
@@ -150,23 +152,21 @@ int main()
             // feed forward on output layer
             feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, SOFTMAX);
 
-            free(input_array[0]);
-            free(input_array);
             // error function gradiant
 
             // yj - dkj for j in Y (output layer)
             // matrix_initialize(expected_output_step, expected_output_step->rows, expected_output_step->cols, &expected_output->data[i][0]);
-            expected_output_array = csv_to_array_labels(train_labels_stream);
-            matrix_initialize(expected_output, expected_output->rows, expected_output->cols, expected_output_array);
+
+            matrix_initialize(expected_output, expected_output->rows, expected_output->cols, expected_output_array[i]);
             matrix_transpose(expected_output, derivate_error_output_layer);
             matrix_subtract(derivate_error_output_layer, activation_output_matrix);
             matrix_multiply_constant(derivate_error_output_layer, -(1.0 / TRAINING_SET_SIZE));
             softmax_derivate(activation_output_matrix, derivate_output);
 
-            for (int d = 0; d < OUTPUT_NEURON; d++)
+            /*for (int d = 0; d < OUTPUT_NEURON; d++)
             {
                 error += expected_output_array[0][d] * log(activation_output_matrix->data[d]);
-            }
+            }*/
 
             // dEk/dyj for j in Y (output layer)
 
@@ -202,12 +202,11 @@ int main()
 
             matrix_add(error_weight_gradient_bias_output, derivate_error_activation_output);
             // free memory
-            free(expected_output_array[0]);
-            free(expected_output_array);
         }
-        printf("*************** EPOCH %d *************\n", j);
-        printf("Error: %f\n", -error);
-        error = 0.0;
+        if (j % 50 == 0)
+            printf("*************** EPOCH %d *************\n", j);
+        /*printf("Error: %f\n", -error);
+        error = 0.0;*/
 
         // update bias weight
         matrix_multiply_constant(error_weight_gradient_bias_output, -learning_rate);
@@ -261,15 +260,22 @@ int main()
         matrix_reset(error_weight_gradient_hidden_1);
 
         // reset file pointer
-        fseek(train_vectors_stream, 0, SEEK_SET);
-        fseek(train_labels_stream, 0, SEEK_SET);
     }
     fclose(train_vectors_stream);
     fclose(train_labels_stream);
+    for (int i = 0; i < TRAINING_SET_SIZE; i++)
+    {
+        free(expected_output_array[i]);
+        free(input_array[i]);
+    }
+    free(expected_output_array);
+    free(input_array);
 
     train_vectors_stream = fopen("./data/fashion_mnist_test_vectors.csv", "r");
-
+    input_array = csv_to_array_vectors(train_vectors_stream, TEST_SET_SIZE);
     train_labels_stream = fopen("./data/fashion_mnist_test_labels.csv", "r");
+    expected_output_array = csv_to_array_labels(train_labels_stream, TEST_SET_SIZE);
+    fseek(train_labels_stream, 0, SEEK_SET);
     for (int i = 0; i < TEST_SET_SIZE; i++)
     {
 
@@ -277,8 +283,7 @@ int main()
 
         // initialisation of input layer
 
-        input_array = csv_to_array_vectors(train_vectors_stream);
-        matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array);
+        matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array[i]);
         matrix_transpose(input_layer_transpose, input_layer);
 
         // feed forward on hidden layer 1
@@ -289,11 +294,7 @@ int main()
 
         // feed forward on output layer
         feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, SOFTMAX);
-
-        free(input_array[0]);
-        free(input_array);
         // error function gradiant
-
         test = csv_to_array_labels_int(train_labels_stream);
         if (get_label(activation_output_matrix) == test)
             cpt++;
@@ -307,6 +308,14 @@ int main()
     printf("time spent : %f minutes\n", time_spent / 60.0);
     printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i\n", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     // free block
+
+    for (int i = 0; i < TRAINING_SET_SIZE; i++)
+    {
+        free(expected_output_array[i]);
+        free(input_array[i]);
+    }
+    free(expected_output_array);
+    free(input_array);
 
     matrix_free(input_layer);
     matrix_free(input_layer_transpose);
