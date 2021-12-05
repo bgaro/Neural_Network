@@ -1,12 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 typedef struct
 {
     int rows;
     int cols;
     float *data;
 } matrix_t;
+
+typedef struct
+{
+    matrix_t *a;
+    matrix_t *b;
+    matrix_t *c;
+    int index;
+    int iteration;
+    int max_thread;
+} args;
 
 void matrix_copy(matrix_t *m, matrix_t *m_c)
 {
@@ -199,30 +210,46 @@ void matrix_initialize(matrix_t *m, int rows, int cols, float **array)
     }
 }
 
-void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul)
+void *matrix_multiply(void *arg)
+
 {
+    args *argument = (args *)arg;
+    matrix_t *m1 = argument->a;
+    matrix_t *m2 = argument->b;
+    matrix_t *m_mul = argument->c;
+    int index = argument->index;
+    int iteration = argument->iteration;
+    int max_thread = argument->max_thread;
+
+    int line = index + iteration * max_thread;
     if (m1 == NULL || m2 == NULL || m_mul == NULL)
     {
         printf("Error matrix_multiply, matrix doesn't exists\n");
-        return;
+        return NULL;
     }
+    /*printf("%d | %d | %d\n", m1->cols, m2->cols, m_mul->cols);
+    printf("%d | %d | %d\n", m1->rows, m2->rows, m_mul->rows);*/
     if ((m1->cols != m2->rows) || (m1->rows != m_mul->rows) || (m2->cols != m_mul->cols))
     {
         printf("Error matrix_multiply : Matrix dimensions do not match\n");
-        return;
+        return NULL;
     }
-    matrix_reset(m_mul);
-    for (int i = 0; i < m1->rows; i++)
+    if (line == 0)
+        matrix_reset(m_mul);
+
+    if (line < m1->rows)
     {
         for (int j = 0; j < m2->cols; j++)
         {
             for (int k = 0; k < m1->cols; k++)
             {
 
-                m_mul->data[m_mul->cols * i + j] += m1->data[m1->cols * i + k] * m2->data[m2->cols * k + j];
+                m_mul->data[m_mul->cols * line + j] += m1->data[m1->cols * line + k] * m2->data[m2->cols * k + j];
             }
         }
+        argument->iteration++;
     }
+    return NULL;
 }
 
 void matrix_multiply_constant(matrix_t *m, float c)

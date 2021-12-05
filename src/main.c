@@ -1,25 +1,29 @@
+#pragma GCC optimize("O3", "unroll-loops", "omit-frame-pointer", "inline") // Optimization flags
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <pthread.h>
 #include "matrix.h"
 #include "activation.h"
 #include "csv_to_array.h"
 #include "neural_network.h"
 
+#define NUM_THREADS 20
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON_1 80
-#define HIDDEN_NEURON 160
+#define HIDDEN_NEURON_1 10
+#define HIDDEN_NEURON 10
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 5000
+#define TRAINING_SET_SIZE 100
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 110
+#define EPOCH 4
+
 int main()
 {
     clock_t begin = clock();
-    srand(time(NULL));
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
@@ -33,13 +37,20 @@ int main()
         return 1;
     }
 
+    pthread_t threads[NUM_THREADS];
+
     float **input_array;
     float **expected_output_array;
-    float learning_rate = 0.14;
-    float alpha = 0.9;
+    float learning_rate = 0.107665;
+    float alpha = 0.979;
     float error = 0.0;
     int test = 0;
     int cpt = 0;
+    args *argument[NUM_THREADS];
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        argument[i] = malloc(sizeof(args));
+    }
     // feed forward matrix
     matrix_t *input_layer_transpose = matrix_create(1, INPUT_NEURON);
     matrix_t *input_layer = matrix_create(INPUT_NEURON, 1);
@@ -130,6 +141,7 @@ int main()
 
     matrix_t *error_weight_gradient_bias_hidden_step = matrix_create(HIDDEN_NEURON, 1);
 
+    printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     for (int j = 0; j < EPOCH; j++)
     {
         for (int i = 0; i < TRAINING_SET_SIZE; i++)
@@ -143,13 +155,13 @@ int main()
             matrix_transpose(input_layer_transpose, input_layer);
 
             // feed forward on hidden layer 1
-            feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU);
+            feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU, NUM_THREADS, threads, argument);
 
             // feed forward on hidden layer
-            feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, reLU);
+            feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, reLU, NUM_THREADS, threads, argument);
 
             // feed forward on output layer
-            feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, softmax);
+            feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, softmax, NUM_THREADS, threads, argument);
 
             free(input_array[0]);
             free(input_array);
@@ -172,26 +184,26 @@ int main()
             // dEk/dyj for j in Y (output layer)
 
             // dEk/dyj for j in Z \ (Y U X) (hidden layer)
-            backward_propagation_neurons(derivate_error_output_layer, derivate_output, derivate_output_activiation, derivate_output_activiation_transpose, weight_hidden_output, derivate_error_hidden_layer_transpose, derivate_error_hidden_layer, SOFTMAX);
+            backward_propagation_neurons(derivate_error_output_layer, derivate_output, derivate_output_activiation, derivate_output_activiation_transpose, weight_hidden_output, derivate_error_hidden_layer_transpose, derivate_error_hidden_layer, SOFTMAX, NUM_THREADS, threads, argument);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 3
             reLU_derivate(hidden_layer, derivate_hidden);
-            backward_propagation_neurons(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_activation, derivate_hidden_activation_transpose, weight_hidden_hidden, derivate_error_hidden_layer_1_transpose, derivate_error_hidden_layer_1, RELU);
+            backward_propagation_neurons(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_activation, derivate_hidden_activation_transpose, weight_hidden_hidden, derivate_error_hidden_layer_1_transpose, derivate_error_hidden_layer_1, RELU, NUM_THREADS, threads, argument);
 
             // dEk/dwij for j in Y(output layer)
 
-            backward_propagation_weights(derivate_error_output_layer, derivate_output, derivate_error_activation_output, activation_hidden_matrix, activation_hidden_matrix_transpose, error_weight_gradient_output_step, SOFTMAX);
+            backward_propagation_weights(derivate_error_output_layer, derivate_output, derivate_error_activation_output, activation_hidden_matrix, activation_hidden_matrix_transpose, error_weight_gradient_output_step, SOFTMAX, NUM_THREADS, threads, argument);
             matrix_add(error_weight_gradient_output, error_weight_gradient_output_step); // sum of each training set
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 4
 
-            backward_propagation_weights(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_error, activation_hidden_1_matrix, activation_hidden_1_matrix_transpose, error_weight_gradient_hidden_step, RELU);
+            backward_propagation_weights(derivate_error_hidden_layer, derivate_hidden, derivate_hidden_error, activation_hidden_1_matrix, activation_hidden_1_matrix_transpose, error_weight_gradient_hidden_step, RELU, NUM_THREADS, threads, argument);
             matrix_add(error_weight_gradient_hidden, error_weight_gradient_hidden_step);
 
             // dEk/dwij for j in Z \ (Y U X) (hidden layer) 3
 
             reLU_derivate(hidden_layer_1, derivate_hidden_1_activation);
-            backward_propagation_weights(derivate_error_hidden_layer_1, derivate_hidden_1_activation, derivate_hidden_1_error, input_layer, input_layer_transpose, error_weight_gradient_hidden_1_step, RELU);
+            backward_propagation_weights(derivate_error_hidden_layer_1, derivate_hidden_1_activation, derivate_hidden_1_error, input_layer, input_layer_transpose, error_weight_gradient_hidden_1_step, RELU, NUM_THREADS, threads, argument);
             matrix_add(error_weight_gradient_hidden_1, error_weight_gradient_hidden_1_step);
 
             // bias of hidden layer 3 update
@@ -276,19 +288,18 @@ int main()
         // Feed forward process
 
         // initialisation of input layer
-
         input_array = csv_to_array_vectors(train_vectors_stream);
         matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array);
         matrix_transpose(input_layer_transpose, input_layer);
 
         // feed forward on hidden layer 1
-        feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU);
+        feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU, NUM_THREADS, threads, argument);
 
         // feed forward on hidden layer
-        feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, reLU);
+        feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, reLU, NUM_THREADS, threads, argument);
 
         // feed forward on output layer
-        feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, softmax);
+        feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, softmax, NUM_THREADS, threads, argument);
 
         free(input_array[0]);
         free(input_array);
@@ -305,6 +316,8 @@ int main()
     fclose(train_labels_stream);
     printf("accuracy : %f percent\n", (float)cpt / (float)TEST_SET_SIZE * 100.0);
     printf("time spent : %f minutes\n", time_spent / 60.0);
+
+    printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     // free block
 
     matrix_free(input_layer);

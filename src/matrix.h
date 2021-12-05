@@ -36,7 +36,8 @@ void matrix_multiply_constant(matrix_t *m, float c);
  * @param m_mul The matrix to store the result.
  * @return void
  * */
-void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul);
+
+void *matrix_multiply(void *args);
 
 /**
  * @brief add matrix m1 to matrix m2
