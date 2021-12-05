@@ -34,7 +34,6 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
         }
 
         /* Reset values to read next ones */
-        memset(train_vectors_string, 0, MAX_TRAIN_VECTORS_LENGTH);
         column = 0;
 
         /* Print pictures */
@@ -51,8 +50,11 @@ float **csv_to_array_vectors(FILE *train_vectors_stream)
         free(train_vectors_string);
         return train_vectors_array;
     }
-    printf("yest\n");
-    return NULL;
+    else
+    {
+        free(train_vectors_string);
+        return NULL;
+    }
 }
 
 int get_label(matrix_t *labels)

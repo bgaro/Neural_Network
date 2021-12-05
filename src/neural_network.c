@@ -7,7 +7,7 @@
 
 // Feed forward
 
-void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *output, matrix_t *activation_output, void (*activation_function)(matrix_t *, matrix_t *))
+void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *output, matrix_t *activation_output, int activation)
 {
     if (weights->cols != input->rows)
     {
@@ -26,8 +26,24 @@ void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *
     }
 
     matrix_multiply(weights, input, output);
-    matrix_add(output, bias);
-    activation_function(output, activation_output);
+    if (activation == SOFTMAX)
+    {
+        matrix_add(output, bias);
+        softmax(output, activation_output);
+    }
+    else if (activation == RELU)
+    {
+        for (int i = 0; i < output->rows; i++)
+        {
+            output->data[i] += bias->data[i];
+            activation_output->data[i] = output->data[i] > 0 ? output->data[i] : 0;
+        }
+    }
+    else
+    {
+        printf("Error: feed_forward: activation not supported\n");
+        return;
+    }
 }
 
 void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *derivate_error_activation_transpose, matrix_t *weights, matrix_t *derivate_error_output_transpose, matrix_t *derivate_error_output, int activation)

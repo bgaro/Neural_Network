@@ -8,18 +8,17 @@
 #include "neural_network.h"
 
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON_1 80
-#define HIDDEN_NEURON 160
+#define HIDDEN_NEURON_1 21
+#define HIDDEN_NEURON 45
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 5000
+#define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 110
+#define EPOCH 600
 int main()
 {
     clock_t begin = clock();
-    srand(time(NULL));
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
@@ -35,8 +34,8 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = 0.14;
-    float alpha = 0.9;
+    float learning_rate = 0.106748;
+    float alpha = 0.96;
     float error = 0.0;
     int test = 0;
     int cpt = 0;
@@ -129,7 +128,7 @@ int main()
     matrix_t *error_weight_gradient_hidden_1_step = matrix_create(HIDDEN_NEURON_1, INPUT_NEURON);
 
     matrix_t *error_weight_gradient_bias_hidden_step = matrix_create(HIDDEN_NEURON, 1);
-
+    printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i\n", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     for (int j = 0; j < EPOCH; j++)
     {
         for (int i = 0; i < TRAINING_SET_SIZE; i++)
@@ -143,13 +142,13 @@ int main()
             matrix_transpose(input_layer_transpose, input_layer);
 
             // feed forward on hidden layer 1
-            feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU);
+            feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, RELU);
 
             // feed forward on hidden layer
-            feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, reLU);
+            feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, RELU);
 
             // feed forward on output layer
-            feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, softmax);
+            feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, SOFTMAX);
 
             free(input_array[0]);
             free(input_array);
@@ -209,6 +208,7 @@ int main()
         printf("*************** EPOCH %d *************\n", j);
         printf("Error: %f\n", -error);
         error = 0.0;
+
         // update bias weight
         matrix_multiply_constant(error_weight_gradient_bias_output, -learning_rate);
         matrix_multiply_constant(error_weight_gradient_bias_hidden, -learning_rate);
@@ -282,13 +282,13 @@ int main()
         matrix_transpose(input_layer_transpose, input_layer);
 
         // feed forward on hidden layer 1
-        feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, reLU);
+        feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, RELU);
 
         // feed forward on hidden layer
-        feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, reLU);
+        feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, RELU);
 
         // feed forward on output layer
-        feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, softmax);
+        feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, SOFTMAX);
 
         free(input_array[0]);
         free(input_array);
@@ -305,6 +305,7 @@ int main()
     fclose(train_labels_stream);
     printf("accuracy : %f percent\n", (float)cpt / (float)TEST_SET_SIZE * 100.0);
     printf("time spent : %f minutes\n", time_spent / 60.0);
+    printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i\n", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     // free block
 
     matrix_free(input_layer);
