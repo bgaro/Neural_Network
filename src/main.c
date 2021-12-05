@@ -10,16 +10,16 @@
 #include "csv_to_array.h"
 #include "neural_network.h"
 
-#define NUM_THREADS 20
+#define NUM_THREADS 4
 #define INPUT_NEURON 784
-#define HIDDEN_NEURON_1 10
-#define HIDDEN_NEURON 10
+#define HIDDEN_NEURON_1 21
+#define HIDDEN_NEURON 45
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 100
+#define TRAINING_SET_SIZE 1000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 4
+#define EPOCH 15
 
 int main()
 {
@@ -41,8 +41,8 @@ int main()
 
     float **input_array;
     float **expected_output_array;
-    float learning_rate = 0.107665;
-    float alpha = 0.979;
+    float learning_rate = 0.106750;
+    float alpha = 0.96;
     float error = 0.0;
     int test = 0;
     int cpt = 0;

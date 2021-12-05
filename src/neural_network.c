@@ -51,11 +51,12 @@ void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *
         {
             pthread_create(&thread[i], NULL, matrix_multiply, argument[i]);
         }
-        for (int i = 0; i < max_thread; i++)
-        {
-            pthread_join(thread[i], NULL);
-        }
     }
+    for (int i = 0; i < max_thread; i++)
+    {
+        pthread_join(thread[i], NULL);
+    }
+
     matrix_add(output, bias);
     activation_function(output, activation_output);
 }
@@ -81,10 +82,10 @@ void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_a
             {
                 pthread_create(&thread[i], NULL, matrix_multiply, argument[i]);
             }
-            for (int i = 0; i < max_thread; i++)
-            {
-                pthread_join(thread[i], NULL);
-            }
+        }
+        for (int i = 0; i < max_thread; i++)
+        {
+            pthread_join(thread[i], NULL);
         }
     }
     matrix_transpose(derivate_error_activation, derivate_error_activation_transpose);
@@ -103,10 +104,10 @@ void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_a
         {
             pthread_create(&thread[i], NULL, matrix_multiply, argument[i]);
         }
-        for (int i = 0; i < max_thread; i++)
-        {
-            pthread_join(thread[i], NULL);
-        }
+    }
+    for (int i = 0; i < max_thread; i++)
+    {
+        pthread_join(thread[i], NULL);
     }
     matrix_transpose(derivate_error_output_transpose, derivate_error_output);
 }
@@ -134,10 +135,10 @@ void backward_propagation_weights(matrix_t *derivate_error, matrix_t *derivate_a
             {
                 pthread_create(&thread[i], NULL, matrix_multiply, argument[i]);
             }
-            for (int i = 0; i < max_thread; i++)
-            {
-                pthread_join(thread[i], NULL);
-            }
+        }
+        for (int i = 0; i < max_thread; i++)
+        {
+            pthread_join(thread[i], NULL);
         }
     }
 
@@ -158,9 +159,9 @@ void backward_propagation_weights(matrix_t *derivate_error, matrix_t *derivate_a
         {
             pthread_create(&thread[i], NULL, matrix_multiply, argument[i]);
         }
-        for (int i = 0; i < max_thread; i++)
-        {
-            pthread_join(thread[i], NULL);
-        }
+    }
+    for (int i = 0; i < max_thread; i++)
+    {
+        pthread_join(thread[i], NULL);
     }
 }

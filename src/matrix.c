@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <pthread.h>
 
 typedef struct
 {
@@ -220,7 +221,7 @@ void *matrix_multiply(void *arg)
     int index = argument->index;
     int iteration = argument->iteration;
     int max_thread = argument->max_thread;
-
+    int aggregate = 0;
     int line = index + iteration * max_thread;
     if (m1 == NULL || m2 == NULL || m_mul == NULL)
     {
@@ -244,11 +245,14 @@ void *matrix_multiply(void *arg)
             for (int k = 0; k < m1->cols; k++)
             {
 
-                m_mul->data[m_mul->cols * line + j] += m1->data[m1->cols * line + k] * m2->data[m2->cols * k + j];
+                aggregate += m1->data[m1->cols * line + k] * m2->data[m2->cols * k + j];
             }
+            m_mul->data[m_mul->cols * line + j] = aggregate;
+            aggregate = 0;
         }
         argument->iteration++;
     }
+    pthread_exit(NULL);
     return NULL;
 }
 
