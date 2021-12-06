@@ -14,12 +14,12 @@
 #define LAYER_NUM 4
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
-#define OUPUT_SIZE 1
-#define EPOCH 900
+#define EPOCH 150
 int main()
 {
+    srand(14);
     clock_t begin = clock();
-    clock_t end;
+    clock_t end = clock();
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
@@ -38,8 +38,8 @@ int main()
 
     float **expected_output_array;
     expected_output_array = csv_to_array_labels(train_labels_stream, TRAINING_SET_SIZE);
-    float learning_rate = 0.106;
-    float alpha = 0.95;
+    float learning_rate = 0.10675;
+    float alpha = 0.959;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -207,7 +207,7 @@ int main()
         if (j % 50 == 0)
         {
             end = clock();
-            printf("*************** EPOCH %.3i ************* : %d\n", j, (double)(end - begin) / CLOCKS_PER_SEC);
+            printf("*************** EPOCH %.3i ************* : %f\n", j, (double)(end - begin) / CLOCKS_PER_SEC);
         }
         /*printf("Error: %f\n", -error);
         error = 0.0;*/
@@ -303,7 +303,7 @@ int main()
         if (get_label(activation_output_matrix) == test)
             cpt++;
     }
-
+    end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("%d / %d\n", cpt, TEST_SET_SIZE);
     fclose(train_vectors_stream);
@@ -313,7 +313,7 @@ int main()
     printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i\n", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     // free block
 
-    for (int i = 0; i < TRAINING_SET_SIZE; i++)
+    for (int i = 0; i < TEST_SET_SIZE; i++)
     {
         free(expected_output_array[i]);
         free(input_array[i]);
@@ -324,10 +324,12 @@ int main()
     matrix_free(input_layer);
     matrix_free(input_layer_transpose);
     matrix_free(hidden_layer);
+    matrix_free(hidden_layer_1);
     matrix_free(activation_hidden_matrix);
     matrix_free(output_layer);
     matrix_free(activation_output_matrix);
     matrix_free(derivate_error_output_layer);
+    matrix_free(derivate_hidden_1_activation);
     matrix_free(derivate_error_output_layer_diag);
     matrix_free(derivate_output);
     matrix_free(derivate_output_diag);
@@ -337,10 +339,13 @@ int main()
     matrix_free(error_weight_gradient_output_step);
     matrix_free(error_weight_gradient_bias_output_step);
     matrix_free(activation_input_matrix);
+    matrix_free(error_weight_gradient_hidden_1_step);
     matrix_free(error_weight_gradient_output_step_transpose);
     matrix_free(activation_input_matrix_transpose);
     matrix_free(bias_hidden);
+    matrix_free(bias_hidden_1);
     matrix_free(bias_output);
+    matrix_free(weight_hidden_hidden);
     matrix_free(weight_input_hidden);
     matrix_free(weight_hidden_output);
     matrix_free(error_weight_gradient_hidden);
@@ -358,12 +363,21 @@ int main()
     matrix_free(derivate_hidden);
     matrix_free(derivate_hidden_diag);
     matrix_free(derivate_hidden_activation);
+    matrix_free(error_weight_gradient_hidden_1_previous_step);
     matrix_free(derivate_hidden_error);
     matrix_free(derivate_error_activation_output);
     matrix_free(error_weight_gradient_bias_output_previous_step);
     matrix_free(error_weight_gradient_bias_hidden_previous_step);
     matrix_free(error_weight_gradient_output_previous_step);
     matrix_free(error_weight_gradient_hidden_previous_step);
-    printf("end\n");
+    matrix_free(activation_hidden_1_matrix);
+    matrix_free(activation_hidden_1_matrix_transpose);
+    matrix_free(derivate_error_hidden_layer_1_transpose);
+    matrix_free(derivate_error_hidden_layer_1);
+    matrix_free(error_weight_gradient_bias_hidden_1);
+    matrix_free(error_weight_gradient_bias_hidden_1_previous_step);
+    matrix_free(derivate_hidden_1_error);
+    matrix_free(error_weight_gradient_hidden_1);
+    matrix_free(derivate_hidden_activation_transpose);
     return 0;
 }

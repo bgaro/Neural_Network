@@ -5,6 +5,12 @@ typedef struct
     float *data;
 } matrix_t;
 
+typedef struct
+{
+    matrix_t *m1;
+    matrix_t *m2;
+} args;
+
 /**
  * @brief Creates a new matrix with the given dimensions.
  * @param rows The number of rows.
@@ -12,6 +18,8 @@ typedef struct
  * @return A pointer to the new matrix.
  */
 matrix_t *matrix_create(int rows, int cols);
+
+void *matrix_add_thread(void *arguments);
 
 /**
  * @brief copy the given matrix
