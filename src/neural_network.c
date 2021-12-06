@@ -33,7 +33,8 @@ void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *
     }
     else if (activation == RELU)
     {
-        for (int i = 0; i < output->rows; i++)
+        int i;
+        for (i = 0; i < output->rows; i++)
         {
             output->data[i] += bias->data[i];
             activation_output->data[i] = output->data[i] > 0 ? output->data[i] : 0;

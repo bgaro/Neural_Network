@@ -21,8 +21,8 @@ void matrix_copy(matrix_t *m, matrix_t *m_c)
         printf("Error: matrix_copy: matrices have different dimensions\n");
         return;
     }
-
-    for (int i = 0; i < (m->rows * m->cols); i++)
+    int i;
+    for (i = 0; i < (m->rows * m->cols); i++)
     {
         m_c->data[i] = m->data[i];
     }
@@ -46,9 +46,10 @@ void matrix_print(matrix_t *m)
         printf("Error matrix_print, matrix doesn't exists\n");
         return;
     }
-    for (int i = 0; i < m->rows; i++)
+    int i, j;
+    for (i = 0; i < m->rows; i++)
     {
-        for (int j = 0; j < m->cols; j++)
+        for (j = 0; j < m->cols; j++)
         {
             printf("%f ", m->data[m->cols * i + j]);
         }
@@ -64,7 +65,8 @@ void matrix_hadamard(matrix_t *m_1, matrix_t *m_2, matrix_t *m_h)
         printf("Error: matrix_hadamard: matrices have different dimensions\n");
         return;
     }
-    for (int i = 0; i < (m_1->rows * m_1->cols); i++)
+    int i;
+    for (i = 0; i < (m_1->rows * m_1->cols); i++)
     {
         m_h->data[i] = m_1->data[i] * m_2->data[i];
     }
@@ -77,7 +79,8 @@ void matrix_reset(matrix_t *m)
         printf("Error matrix_reset, matrix doesn't exists\n");
         return;
     }
-    for (int i = 0; i < m->rows * m->cols; i++)
+    int i;
+    for (i = 0; i < m->rows * m->cols; i++)
     {
         m->data[i] = 0.0;
     }
@@ -109,7 +112,8 @@ void *matrix_add_thread(void *arguments)
         printf("Error matrix_add : Matrix dimensions do not match\n");
         return NULL;
     }
-    for (int i = 0; i < m1->rows * m1->cols; i++)
+    int i;
+    for (i = 0; i < m1->rows * m1->cols; i++)
     {
 
         m1->data[i] += m2->data[i];
@@ -130,7 +134,8 @@ void matrix_add(matrix_t *m1, matrix_t *m2)
         printf("Error matrix_add : Matrix dimensions do not match\n");
         return;
     }
-    for (int i = 0; i < m1->rows * m1->cols; i++)
+    int i;
+    for (i = 0; i < m1->rows * m1->cols; i++)
     {
 
         m1->data[i] += m2->data[i];
@@ -149,9 +154,10 @@ void matrix_transpose(matrix_t *m, matrix_t *m_transpose)
         printf("Error matrix_transpose : Matrix dimensions do not match\n");
         return;
     }
-    for (int i = 0; i < m->rows; i++)
+    int i, j;
+    for (i = 0; i < m->rows; i++)
     {
-        for (int j = 0; j < m->cols; j++)
+        for (j = 0; j < m->cols; j++)
         {
             m_transpose->data[m_transpose->cols * j + i] = m->data[m->cols * i + j];
         }
@@ -166,7 +172,8 @@ void matrix_initialize_random(matrix_t *m, int nb_neuron_out, int nb_neuron_in)
         printf("Error matrix_initialize_random, matrix doesn't exists\n");
         return;
     }
-    for (int i = 0; i < m->rows * m->cols; i++)
+    int i;
+    for (i = 0; i < m->rows * m->cols; i++)
     {
 
         m->data[i] = (2 * (float)rand() / ((float)RAND_MAX) - 1) * sqrt(6.0) / sqrt(nb_neuron_out + nb_neuron_in);
@@ -180,7 +187,8 @@ void matrix_initialize_to_value(matrix_t *m, float value)
         printf("Error matrix_initialize_to_value, matrix doesn't exists\n");
         return;
     }
-    for (int i = 0; i < m->rows * m->cols; i++)
+    int i;
+    for (i = 0; i < m->rows * m->cols; i++)
     {
 
         m->data[i] = value;
@@ -200,7 +208,8 @@ void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal)
         return;
     }
     matrix_reset(m_diagonal);
-    for (int i = 0; i < m->rows; i++)
+    int i;
+    for (i = 0; i < m->rows; i++)
     {
         m_diagonal->data[i * m_diagonal->cols + i] = m->data[i];
     }
@@ -219,9 +228,10 @@ void matrix_initialize(matrix_t *m, int rows, int cols, float *array)
         printf("Error matrix_initialize: Matrix dimensions do not match\n");
         return;
     }
-    for (int i = 0; i < m->rows; i++)
+    int i, j;
+    for (i = 0; i < m->rows; i++)
     {
-        for (int j = 0; j < m->cols; j++)
+        for (j = 0; j < m->cols; j++)
         {
             m->data[m->cols * i + j] = array[j];
         }
@@ -240,13 +250,14 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul)
         printf("Error matrix_multiply : Matrix dimensions do not match\n");
         return;
     }
+    int i, j, k;
 
-    for (int i = 0; i < m1->rows; i++)
+    for (i = 0; i < m1->rows; i++)
     {
-        for (int j = 0; j < m2->cols; j++)
+        for (j = 0; j < m2->cols; j++)
         {
             m_mul->data[m_mul->cols * i + j] = 0.0;
-            for (int k = 0; k < m1->cols; k++)
+            for (k = 0; k < m1->cols; k++)
             {
 
                 m_mul->data[m_mul->cols * i + j] += m1->data[m1->cols * i + k] * m2->data[m2->cols * k + j];
@@ -262,7 +273,8 @@ void matrix_multiply_constant(matrix_t *m, float c)
         printf("Error matrix_multiply_constant, matrix doesn't exists\n");
         return;
     }
-    for (int i = 0; i < m->rows * m->cols; i++)
+    int i;
+    for (i = 0; i < m->rows * m->cols; i++)
     {
 
         m->data[i] *= c;
@@ -281,7 +293,8 @@ void matrix_subtract(matrix_t *m1, matrix_t *m2)
         printf("Error matrix_subtract : Matrix dimensions do not match\n");
         return;
     }
-    for (int i = 0; i < m1->rows * m2->cols; i++)
+    int i;
+    for (i = 0; i < m1->rows * m2->cols; i++)
     {
 
         m1->data[i] -= m2->data[i];

@@ -18,7 +18,8 @@ float **csv_to_array_vectors(FILE *train_vectors_stream, int size)
     train_vectors_string = malloc(sizeof(char) * MAX_TRAIN_VECTORS_LENGTH + 1);
     float **train_vectors_array;
     train_vectors_array = malloc(sizeof(float *) * size);
-    for (int j = 0; j < size; j++)
+    int j;
+    for (j = 0; j < size; j++)
     {
         train_vectors_array[j] = malloc(sizeof(float) * IMAGE_SIZE);
     }
@@ -62,7 +63,8 @@ int get_label(matrix_t *labels)
 {
     float max = labels->data[0];
     int index = 0;
-    for (int i = 0; i < labels->rows * labels->cols; i++)
+    int i;
+    for (i = 0; i < labels->rows * labels->cols; i++)
     {
         if (labels->data[i] > max)
         {
@@ -98,7 +100,8 @@ float **csv_to_array_labels(FILE *train_vectors_stream, int size)
     int row = 0;
     float **train_vectors_array;
     train_vectors_array = malloc(sizeof(float *) * size);
-    for (int j = 0; j < size; j++)
+    int j;
+    for (j = 0; j < size; j++)
     {
         train_vectors_array[j] = calloc(sizeof(float), 10);
     }
