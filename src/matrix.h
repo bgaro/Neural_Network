@@ -5,12 +5,6 @@ typedef struct
     float *data;
 } matrix_t;
 
-typedef struct
-{
-    matrix_t *m1;
-    matrix_t *m2;
-} args;
-
 /**
  * @brief Creates a new matrix with the given dimensions.
  * @param rows The number of rows.
@@ -18,8 +12,6 @@ typedef struct
  * @return A pointer to the new matrix.
  */
 matrix_t *matrix_create(int rows, int cols);
-
-void *matrix_add_thread(void *arguments);
 
 /**
  * @brief copy the given matrix
@@ -53,7 +45,15 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul);
  * */
 void matrix_add(matrix_t *m1, matrix_t *m2);
 
+/**
+ * @brief create an hadamard matrix from two matrices m1 and m2
+ * @param m1 The first matrix.
+ * @param m2 The second matrix.
+ * @param m_h The matrix to store the result.
+ * @return void
+ * */
 void matrix_hadamard(matrix_t *m_1, matrix_t *m_2, matrix_t *m_h);
+
 /**
  * @brief reset matrix m to 0
  * @param m The first matrix.
@@ -83,7 +83,14 @@ void matrix_diagonalize(matrix_t *m, matrix_t *m_diagonal);
  * */
 void matrix_initialize_random(matrix_t *m, int nb_neuron_out, int nb_neuron_in);
 
+/**
+ * @brief initialize the given matrix with a given value
+ * @param m The matrix to initialize.
+ * @param value The value to initialize the matrix
+ * @return void
+ * */
 void matrix_initialize_to_value(matrix_t *m, float value);
+
 /**
  * @brief transpose the given matrix
  * @param m The matrix to transpose.
@@ -91,6 +98,7 @@ void matrix_initialize_to_value(matrix_t *m, float value);
  * @return void
  * */
 void matrix_transpose(matrix_t *m, matrix_t *m_transpose);
+
 /**
  * @brief print the given matrix
  * @param m The matrix to print.
