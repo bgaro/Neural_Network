@@ -15,10 +15,11 @@
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
 #define OUPUT_SIZE 1
-#define EPOCH 550
+#define EPOCH 900
 int main()
 {
     clock_t begin = clock();
+    clock_t end;
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
@@ -37,8 +38,8 @@ int main()
 
     float **expected_output_array;
     expected_output_array = csv_to_array_labels(train_labels_stream, TRAINING_SET_SIZE);
-    float learning_rate = 0.106748;
-    float alpha = 0.96;
+    float learning_rate = 0.106;
+    float alpha = 0.95;
     int test = 0;
     int cpt = 0;
     // feed forward matrix
@@ -204,7 +205,10 @@ int main()
             // free memory
         }
         if (j % 50 == 0)
-            printf("*************** EPOCH %d *************\n", j);
+        {
+            end = clock();
+            printf("*************** EPOCH %.3i ************* : %d\n", j, (double)(end - begin) / CLOCKS_PER_SEC);
+        }
         /*printf("Error: %f\n", -error);
         error = 0.0;*/
 
@@ -299,7 +303,7 @@ int main()
         if (get_label(activation_output_matrix) == test)
             cpt++;
     }
-    clock_t end = clock();
+
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("%d / %d\n", cpt, TEST_SET_SIZE);
     fclose(train_vectors_stream);
