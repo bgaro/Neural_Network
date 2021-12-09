@@ -8,19 +8,11 @@ typedef struct
     float *data;
 } matrix_t;
 
-void matrix_copy(matrix_t *m, matrix_t *m_c)
+typedef struct
 {
-    if (m->rows != m_c->rows || m->cols != m_c->cols)
-    {
-        printf("Error: matrix_copy: matrices have different dimensions\n");
-        return;
-    }
-    int i;
-    for (i = 0; i < (m->rows * m->cols); i++)
-    {
-        m_c->data[i] = m->data[i];
-    }
-}
+    matrix_t *m1;
+    matrix_t *m2;
+} args;
 
 matrix_t *matrix_create(int rows, int cols)
 {
@@ -31,6 +23,19 @@ matrix_t *matrix_create(int rows, int cols)
     m->cols = cols;
     m->data = (float *)calloc(sizeof(float), rows * cols);
     return m;
+}
+
+matrix_t *matrix_copy(matrix_t *m)
+{
+
+    int i;
+    matrix_t *m_c = matrix_create(m->rows, m->cols);
+
+    for (i = 0; i < (m->rows * m->cols); i++)
+    {
+        m_c->data[i] = m->data[i];
+    }
+    return m_c;
 }
 
 void matrix_print(matrix_t *m)
@@ -89,6 +94,31 @@ void matrix_free(matrix_t *m)
     }
     free(m->data);
     free(m);
+}
+
+void *matrix_add_thread(void *arguments)
+{
+    args *arg = (args *)arguments;
+    matrix_t *m1 = arg->m1;
+    matrix_t *m2 = arg->m2;
+    if (m1 == NULL || m2 == NULL)
+    {
+        printf("Error matrix_add, matrix doesn't exists\n");
+        return NULL;
+    }
+    if ((m1->rows != m2->rows) || (m1->cols != m2->cols))
+    {
+        printf("Error matrix_add : Matrix dimensions do not match\n");
+        return NULL;
+    }
+    int i;
+    for (i = 0; i < m1->rows * m1->cols; i++)
+    {
+
+        m1->data[i] += m2->data[i];
+    }
+
+    return NULL;
 }
 
 void matrix_add(matrix_t *m1, matrix_t *m2)

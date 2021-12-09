@@ -39,3 +39,66 @@ void backward_propagation_neurons(matrix_t *derivate_error, matrix_t *derivate_a
  * @return void
  * */
 void backward_propagation_weights(matrix_t *derivate_error, matrix_t *derivate_activation, matrix_t *derivate_error_activation, matrix_t *activation_layer, matrix_t *activation_layer_transpose, matrix_t *weight_derivate_output, int activation);
+
+void *training_thread(void *arg);
+
+typedef struct
+{
+    int index;
+    int thread_num;
+
+    matrix_t *input_layer_transpose;
+    float **input_array;
+    float **expected_output_array;
+    matrix_t *input_layer;
+    matrix_t *weight_input_hidden;
+    matrix_t *bias_hidden_1;
+    matrix_t *hidden_layer_1;
+    matrix_t *activation_hidden_1_matrix;
+    matrix_t *weight_hidden_hidden;
+    matrix_t *bias_hidden;
+    matrix_t *hidden_layer;
+    matrix_t *activation_hidden_matrix;
+    matrix_t *weight_hidden_output;
+    matrix_t *bias_output;
+    matrix_t *output_layer;
+    matrix_t *activation_output_matrix;
+    matrix_t *expected_output;
+    matrix_t *derivate_error_output_layer;
+    matrix_t *derivate_output;
+    matrix_t *derivate_output_activiation;
+    matrix_t *derivate_output_activiation_transpose;
+    matrix_t *derivate_error_hidden_layer_transpose;
+    matrix_t *derivate_error_hidden_layer;
+    matrix_t *derivate_hidden;
+    matrix_t *derivate_hidden_activation;
+    matrix_t *derivate_hidden_activation_transpose;
+    matrix_t *derivate_error_hidden_layer_1_transpose;
+    matrix_t *derivate_error_hidden_layer_1;
+    matrix_t *derivate_error_activation_output;
+    matrix_t *activation_hidden_matrix_transpose;
+    matrix_t *error_weight_gradient_output_step;
+    matrix_t *derivate_hidden_error;
+    matrix_t *activation_hidden_1_matrix_transpose;
+    matrix_t *error_weight_gradient_hidden_step;
+    matrix_t *derivate_hidden_1_activation;
+    matrix_t *derivate_hidden_1_error;
+    matrix_t *error_weight_gradient_hidden_1_step;
+    matrix_t *error_weight_gradient_output;
+    matrix_t *error_weight_gradient_hidden;
+    matrix_t *error_weight_gradient_hidden_1;
+    matrix_t *error_weight_gradient_bias_hidden_1;
+    matrix_t *error_weight_gradient_bias_hidden;
+    matrix_t *error_weight_gradient_bias_output;
+
+} arguments;
+
+typedef struct
+{
+    matrix_t *error_weight_gradient_output;
+    matrix_t *error_weight_gradient_hidden;
+    matrix_t *error_weight_gradient_hidden_1;
+    matrix_t *error_weight_gradient_bias_hidden_1;
+    matrix_t *error_weight_gradient_bias_hidden;
+    matrix_t *error_weight_gradient_bias_output;
+} return_s;

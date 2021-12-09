@@ -17,3 +17,5 @@ echo "#################"
 
 ./main
 
+cd python_evaluator
+python3 evaluate.py ../actualTestPredictions ../data/fashion_mnist_test_labels.csv

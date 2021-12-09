@@ -5,6 +5,12 @@ typedef struct
     float *data;
 } matrix_t;
 
+typedef struct
+{
+    matrix_t *m1;
+    matrix_t *m2;
+} args;
+
 /**
  * @brief Creates a new matrix with the given dimensions.
  * @param rows The number of rows.
@@ -16,10 +22,9 @@ matrix_t *matrix_create(int rows, int cols);
 /**
  * @brief copy the given matrix
  * @param m The matrix to copy.
- * @param m_copy The matrix to copy to.
- * @return void
+ * @return pointer to copy matrix
  * */
-void matrix_copy(matrix_t *m, matrix_t *m_copy);
+matrix_t *matrix_copy(matrix_t *m);
 
 /**
  * @brief multiply given matrix by constant c
@@ -44,6 +49,8 @@ void matrix_multiply(matrix_t *m1, matrix_t *m2, matrix_t *m_mul);
  * @param m2 The second matrix.
  * */
 void matrix_add(matrix_t *m1, matrix_t *m2);
+
+void *matrix_add_thread(void *arguments);
 
 /**
  * @brief create an hadamard matrix from two matrices m1 and m2
