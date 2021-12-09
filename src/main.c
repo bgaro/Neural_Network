@@ -11,7 +11,7 @@
 #include "csv_to_array.h"
 #include "neural_network.h"
 
-#define NUM_THREADS 1
+#define NUM_THREADS 4
 #define INPUT_NEURON 784
 #define HIDDEN_NEURON_1 21
 #define HIDDEN_NEURON 45
@@ -204,35 +204,35 @@ int main()
 
     for (epoch = 0; epoch < EPOCH; epoch++)
     {
-        /* for (training = 0; training < NUM_THREADS; training++)
-         {
-             pthread_create(&threads[training], NULL, training_thread, (void *)&args);
-         }
-         for (training = 0; training < NUM_THREADS; training++)
-         {
-             pthread_join(threads[training], &return_value);
-             memcpy(&returns[training], return_value, sizeof(return_s));
-             free(return_value);
-         }
-         for (training = 0; training < NUM_THREADS; training++)
-         {
+        for (training = 0; training < NUM_THREADS; training++)
+        {
+            pthread_create(&threads[training], NULL, training_thread, (void *)&args);
+        }
+        for (training = 0; training < NUM_THREADS; training++)
+        {
+            pthread_join(threads[training], &return_value);
+            memcpy(&returns[training], return_value, sizeof(return_s));
+            free(return_value);
+        }
+        for (training = 0; training < NUM_THREADS; training++)
+        {
 
-             matrix_add(error_weight_gradient_output, returns[training].error_weight_gradient_output);
-             matrix_add(error_weight_gradient_hidden, returns[training].error_weight_gradient_hidden);
-             matrix_add(error_weight_gradient_hidden_1, returns[training].error_weight_gradient_hidden_1);
-             matrix_add(error_weight_gradient_bias_hidden, returns[training].error_weight_gradient_bias_hidden);
-             matrix_add(error_weight_gradient_bias_hidden_1, returns[training].error_weight_gradient_bias_hidden_1);
-             matrix_add(error_weight_gradient_bias_output, returns[training].error_weight_gradient_bias_output);
+            matrix_add(error_weight_gradient_output, returns[training].error_weight_gradient_output);
+            matrix_add(error_weight_gradient_hidden, returns[training].error_weight_gradient_hidden);
+            matrix_add(error_weight_gradient_hidden_1, returns[training].error_weight_gradient_hidden_1);
+            matrix_add(error_weight_gradient_bias_hidden, returns[training].error_weight_gradient_bias_hidden);
+            matrix_add(error_weight_gradient_bias_hidden_1, returns[training].error_weight_gradient_bias_hidden_1);
+            matrix_add(error_weight_gradient_bias_output, returns[training].error_weight_gradient_bias_output);
 
-             matrix_free(returns[training].error_weight_gradient_output);
-             matrix_free(returns[training].error_weight_gradient_hidden);
-             matrix_free(returns[training].error_weight_gradient_hidden_1);
-             matrix_free(returns[training].error_weight_gradient_bias_hidden);
-             matrix_free(returns[training].error_weight_gradient_bias_hidden_1);
-             matrix_free(returns[training].error_weight_gradient_bias_output);
-         } */
+            matrix_free(returns[training].error_weight_gradient_output);
+            matrix_free(returns[training].error_weight_gradient_hidden);
+            matrix_free(returns[training].error_weight_gradient_hidden_1);
+            matrix_free(returns[training].error_weight_gradient_bias_hidden);
+            matrix_free(returns[training].error_weight_gradient_bias_hidden_1);
+            matrix_free(returns[training].error_weight_gradient_bias_output);
+        }
 
-        for (training = 0; training < TRAINING_SET_SIZE; training++)
+        /*for (training = 0; training < TRAINING_SET_SIZE; training++)
         {
             // Feed forward process
 
@@ -297,7 +297,7 @@ int main()
             matrix_add(error_weight_gradient_bias_output, derivate_error_activation_output);
 
             // free memory
-        }
+        }*/
 
         // update bias weight
         matrix_multiply_constant(error_weight_gradient_bias_output, -learning_rate);
