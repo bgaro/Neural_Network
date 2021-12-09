@@ -11,7 +11,7 @@
 #include "csv_to_array.h"
 #include "neural_network.h"
 
-#define NUM_THREADS 2
+#define NUM_THREADS 1
 #define INPUT_NEURON 784
 #define HIDDEN_NEURON_1 21
 #define HIDDEN_NEURON 45
@@ -51,8 +51,8 @@ int main()
     input_array = csv_to_array_vectors(train_vectors_stream, TRAINING_SET_SIZE);
     float **expected_output_array;
     expected_output_array = csv_to_array_labels(train_labels_stream, TRAINING_SET_SIZE);
-    float learning_rate = 0.108;
-    float alpha = 0.96;
+    float learning_rate = 0.10676;
+    float alpha = 0.965;
 
     int train_prediction_fd = 0;
     int test_prediction_fd = 0;
@@ -381,7 +381,11 @@ int main()
         // error function gradiant
         prediction = get_label(activation_output_matrix);
         sprintf(prediction_buffer, "%d\n", prediction);
-        write(train_prediction_fd, prediction_buffer, strlen(prediction_buffer));
+        if ((write(train_prediction_fd, prediction_buffer, strlen(prediction_buffer))) < 0)
+        {
+            printf("Error writing in a file\n");
+            return 1;
+        }
     }
 
     fclose(train_vectors_stream);
@@ -420,7 +424,11 @@ int main()
         // error function gradiant
         prediction = get_label(activation_output_matrix);
         sprintf(prediction_buffer, "%d\n", prediction);
-        write(test_prediction_fd, prediction_buffer, strlen(prediction_buffer));
+        if ((write(test_prediction_fd, prediction_buffer, strlen(prediction_buffer))) < 0)
+        {
+            printf("Error writing in a file\n");
+            return 1;
+        }
     }
     fclose(train_vectors_stream);
     fclose(train_labels_stream);
