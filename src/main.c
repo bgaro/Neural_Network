@@ -17,9 +17,9 @@
 #define HIDDEN_NEURON 45
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 50
+#define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
-#define EPOCH 1
+#define EPOCH 1500
 int main()
 {
 
@@ -44,16 +44,15 @@ int main()
     pthread_t threads[NUM_THREADS];
     arguments args[NUM_THREADS];
     return_s returns[NUM_THREADS];
-    return_s *tmp;
     void *return_value[NUM_THREADS];
     time_t start, end;
-    start = clock();
+    start = time(NULL);
 
     input_array = csv_to_array_vectors(train_vectors_stream, TRAINING_SET_SIZE);
     float **expected_output_array;
     expected_output_array = csv_to_array_labels(train_labels_stream, TRAINING_SET_SIZE);
-    float learning_rate = 0.10676;
-    float alpha = 0.965;
+    float learning_rate = 0.106;
+    float alpha = 0.95;
 
     int train_prediction_fd = 0;
     int test_prediction_fd = 0;
@@ -440,8 +439,8 @@ int main()
     fclose(train_labels_stream);
     printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i\n", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     // free block
-    end = clock();
-    printf("Time taken : %f\n", (double)(end - start) / CLOCKS_PER_SEC / 60.0);
+    end = time(NULL);
+    printf("Time : %f\n", (double)(end - start) / 60.0);
     for (training = 0; training < TEST_SET_SIZE; training++)
     {
         free(expected_output_array[training]);

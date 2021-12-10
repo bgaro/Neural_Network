@@ -7,7 +7,7 @@
 #define SOFTMAX 0
 #define RELU 1
 #define INPUT_NEURON 784
-#define TRAINING_SET_SIZE 50
+#define TRAINING_SET_SIZE 60000
 
 typedef struct
 {
