@@ -7,7 +7,7 @@
 #define SOFTMAX 0
 #define RELU 1
 #define INPUT_NEURON 784
-#define TRAINING_SET_SIZE 60000
+#define TRAINING_SET_SIZE 50
 
 typedef struct
 {
@@ -242,7 +242,7 @@ void *training_thread(void *arg)
         // Feed forward process
 
         // initialisation of input layer
-
+        // printf("%d : ", i);
         matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array[i]);
         matrix_transpose(input_layer_transpose, input_layer);
 

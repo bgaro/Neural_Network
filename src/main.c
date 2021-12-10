@@ -17,9 +17,9 @@
 #define HIDDEN_NEURON 45
 #define OUTPUT_NEURON 10
 #define LAYER_NUM 4
-#define TRAINING_SET_SIZE 60000
+#define TRAINING_SET_SIZE 50
 #define TEST_SET_SIZE 10000
-#define EPOCH 10
+#define EPOCH 1
 int main()
 {
 
@@ -44,7 +44,8 @@ int main()
     pthread_t threads[NUM_THREADS];
     arguments args[NUM_THREADS];
     return_s returns[NUM_THREADS];
-    void *return_value;
+    return_s *tmp;
+    void *return_value[NUM_THREADS];
     time_t start, end;
     start = clock();
 
@@ -206,13 +207,13 @@ int main()
     {
         for (training = 0; training < NUM_THREADS; training++)
         {
-            pthread_create(&threads[training], NULL, training_thread, (void *)&args);
+            pthread_create(&threads[training], NULL, training_thread, (void *)&args[training]);
         }
         for (training = 0; training < NUM_THREADS; training++)
         {
-            pthread_join(threads[training], &return_value);
-            memcpy(&returns[training], return_value, sizeof(return_s));
-            free(return_value);
+            pthread_join(threads[training], &return_value[training]);
+            memcpy(&returns[training], return_value[training], sizeof(return_s));
+            free(return_value[training]);
         }
         for (training = 0; training < NUM_THREADS; training++)
         {
@@ -298,7 +299,12 @@ int main()
 
             // free memory
         }*/
-
+        if (epoch % 50 == 0)
+        {
+            printf("\n");
+            printf("Epoch %d\n", epoch);
+            printf("\n");
+        }
         // update bias weight
         matrix_multiply_constant(error_weight_gradient_bias_output, -learning_rate);
         matrix_multiply_constant(error_weight_gradient_bias_hidden, -learning_rate);
