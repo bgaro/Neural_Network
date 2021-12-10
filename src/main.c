@@ -11,7 +11,7 @@
 #include "csv_to_array.h"
 #include "neural_network.h"
 
-#define NUM_THREADS 4
+#define NUM_THREADS 2
 #define INPUT_NEURON 784
 #define HIDDEN_NEURON_1 21
 #define HIDDEN_NEURON 45
@@ -19,17 +19,17 @@
 #define LAYER_NUM 4
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
-#define EPOCH 1475
+#define EPOCH 700
 int main()
 {
 
-    FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
+    FILE *train_vectors_stream = fopen("./data/mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
         printf("Error opening file\n");
         return 1;
     }
-    FILE *train_labels_stream = fopen("./data/fashion_mnist_train_labels.csv", "r");
+    FILE *train_labels_stream = fopen("./data/mnist_train_labels.csv", "r");
     if (train_labels_stream == NULL)
     {
         printf("Error opening file\n");
@@ -43,7 +43,11 @@ int main()
     int training = 0;
     int i;
     pthread_t threads[NUM_THREADS];
-    arguments args[NUM_THREADS];
+    arguments *args[NUM_THREADS];
+    for(i = 0; i<NUM_THREADS;i++)
+    {
+        args[i] = malloc(sizeof(arguments));
+    }
     return_s returns[NUM_THREADS];
     void *return_value[NUM_THREADS];
     time_t start, end;
@@ -155,71 +159,73 @@ int main()
 
     for (training = 0; training < NUM_THREADS; training++)
     {
-        args[training].index = training;
-        args[training].thread_num = NUM_THREADS;
-        args[training].input_array = malloc(sizeof(float *) * TRAINING_SET_SIZE);
-        args[training].expected_output_array = malloc(sizeof(float *) * TRAINING_SET_SIZE);
+        args[training]->index = training;
+        args[training]->thread_num = NUM_THREADS;
+        args[training]->input_array = malloc(sizeof(float *) * TRAINING_SET_SIZE);
+        args[training]->expected_output_array = malloc(sizeof(float *) * TRAINING_SET_SIZE);
 
         for (i = 0; i < TRAINING_SET_SIZE; i++)
         {
-            args[training].input_array[i] = malloc(sizeof(float) * INPUT_NEURON);
-            memcpy(args[training].input_array[i], input_array[i], sizeof(float) * INPUT_NEURON);
+            args[training]->input_array[i] = malloc(sizeof(float) * INPUT_NEURON);
+            memcpy(args[training]->input_array[i], input_array[i], sizeof(float) * INPUT_NEURON);
         }
 
         for (i = 0; i < TRAINING_SET_SIZE; i++)
         {
-            args[training].expected_output_array[i] = malloc(sizeof(float) * OUTPUT_NEURON);
-            memcpy(args[training].expected_output_array[i], expected_output_array[i], sizeof(float) * OUTPUT_NEURON);
+            args[training]->expected_output_array[i] = malloc(sizeof(float) * OUTPUT_NEURON);
+            memcpy(args[training]->expected_output_array[i], expected_output_array[i], sizeof(float) * OUTPUT_NEURON);
         }
 
-        args[training].input_layer_transpose = matrix_copy(input_layer_transpose);
-        args[training].input_layer = matrix_copy(input_layer);
-        args[training].weight_input_hidden = matrix_copy(weight_input_hidden);
-        args[training].bias_hidden_1 = matrix_copy(bias_hidden_1);
-        args[training].hidden_layer_1 = matrix_copy(hidden_layer_1);
-        args[training].activation_hidden_1_matrix = matrix_copy(activation_hidden_1_matrix);
-        args[training].weight_hidden_hidden = matrix_copy(weight_hidden_hidden);
-        args[training].bias_hidden = matrix_copy(bias_hidden);
-        args[training].hidden_layer = matrix_copy(hidden_layer);
-        args[training].activation_hidden_matrix = matrix_copy(activation_hidden_matrix);
-        args[training].weight_hidden_output = matrix_copy(weight_hidden_output);
-        args[training].bias_output = matrix_copy(bias_output);
-        args[training].output_layer = matrix_copy(output_layer);
-        args[training].activation_output_matrix = matrix_copy(activation_output_matrix);
-        args[training].expected_output = matrix_copy(expected_output);
-        args[training].derivate_error_output_layer = matrix_copy(derivate_error_output_layer);
-        args[training].derivate_output = matrix_copy(derivate_output);
-        args[training].derivate_output_activiation = matrix_copy(derivate_output_activiation);
-        args[training].derivate_output_activiation_transpose = matrix_copy(derivate_output_activiation_transpose);
-        args[training].derivate_error_hidden_layer_transpose = matrix_copy(derivate_error_hidden_layer_transpose);
-        args[training].derivate_error_hidden_layer = matrix_copy(derivate_error_hidden_layer);
-        args[training].derivate_hidden = matrix_copy(derivate_hidden);
-        args[training].derivate_hidden_activation = matrix_copy(derivate_hidden_activation);
-        args[training].derivate_hidden_activation_transpose = matrix_copy(derivate_hidden_activation_transpose);
-        args[training].derivate_error_hidden_layer_1_transpose = matrix_copy(derivate_error_hidden_layer_1_transpose);
-        args[training].derivate_error_hidden_layer_1 = matrix_copy(derivate_error_hidden_layer_1);
-        args[training].derivate_error_activation_output = matrix_copy(derivate_error_activation_output);
-        args[training].activation_hidden_matrix_transpose = matrix_copy(activation_hidden_matrix_transpose);
-        args[training].error_weight_gradient_output_step = matrix_copy(error_weight_gradient_output_step);
-        args[training].derivate_hidden_error = matrix_copy(derivate_hidden_error);
-        args[training].activation_hidden_1_matrix_transpose = matrix_copy(activation_hidden_1_matrix_transpose);
-        args[training].error_weight_gradient_hidden_step = matrix_copy(error_weight_gradient_hidden_step);
-        args[training].derivate_hidden_1_activation = matrix_copy(derivate_hidden_1_activation);
-        args[training].derivate_hidden_1_error = matrix_copy(derivate_hidden_1_error);
-        args[training].error_weight_gradient_hidden_1_step = matrix_copy(error_weight_gradient_hidden_1_step);
-        args[training].error_weight_gradient_output = matrix_copy(error_weight_gradient_output);
-        args[training].error_weight_gradient_hidden = matrix_copy(error_weight_gradient_hidden);
-        args[training].error_weight_gradient_hidden_1 = matrix_copy(error_weight_gradient_hidden_1);
-        args[training].error_weight_gradient_bias_hidden_1 = matrix_copy(error_weight_gradient_bias_hidden_1);
-        args[training].error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
-        args[training].error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
+        args[training]->input_layer_transpose = matrix_copy(input_layer_transpose);
+        args[training]->input_layer = matrix_copy(input_layer);
+        args[training]->weight_input_hidden = matrix_copy(weight_input_hidden);
+        args[training]->bias_hidden_1 = matrix_copy(bias_hidden_1);
+        args[training]->hidden_layer_1 = matrix_copy(hidden_layer_1);
+        args[training]->activation_hidden_1_matrix = matrix_copy(activation_hidden_1_matrix);
+        args[training]->weight_hidden_hidden = matrix_copy(weight_hidden_hidden);
+        args[training]->bias_hidden = matrix_copy(bias_hidden);
+        args[training]->hidden_layer = matrix_copy(hidden_layer);
+        args[training]->activation_hidden_matrix = matrix_copy(activation_hidden_matrix);
+        args[training]->weight_hidden_output = matrix_copy(weight_hidden_output);
+        args[training]->bias_output = matrix_copy(bias_output);
+        args[training]->output_layer = matrix_copy(output_layer);
+        args[training]->activation_output_matrix = matrix_copy(activation_output_matrix);
+        args[training]->expected_output = matrix_copy(expected_output);
+        args[training]->derivate_error_output_layer = matrix_copy(derivate_error_output_layer);
+        args[training]->derivate_output = matrix_copy(derivate_output);
+        args[training]->derivate_output_activiation = matrix_copy(derivate_output_activiation);
+        args[training]->derivate_output_activiation_transpose = matrix_copy(derivate_output_activiation_transpose);
+        args[training]->derivate_error_hidden_layer_transpose = matrix_copy(derivate_error_hidden_layer_transpose);
+        args[training]->derivate_error_hidden_layer = matrix_copy(derivate_error_hidden_layer);
+        args[training]->derivate_hidden = matrix_copy(derivate_hidden);
+        args[training]->derivate_hidden_activation = matrix_copy(derivate_hidden_activation);
+        args[training]->derivate_hidden_activation_transpose = matrix_copy(derivate_hidden_activation_transpose);
+        args[training]->derivate_error_hidden_layer_1_transpose = matrix_copy(derivate_error_hidden_layer_1_transpose);
+        args[training]->derivate_error_hidden_layer_1 = matrix_copy(derivate_error_hidden_layer_1);
+        args[training]->derivate_error_activation_output = matrix_copy(derivate_error_activation_output);
+        args[training]->activation_hidden_matrix_transpose = matrix_copy(activation_hidden_matrix_transpose);
+        args[training]->error_weight_gradient_output_step = matrix_copy(error_weight_gradient_output_step);
+        args[training]->derivate_hidden_error = matrix_copy(derivate_hidden_error);
+        args[training]->activation_hidden_1_matrix_transpose = matrix_copy(activation_hidden_1_matrix_transpose);
+        args[training]->error_weight_gradient_hidden_step = matrix_copy(error_weight_gradient_hidden_step);
+        args[training]->derivate_hidden_1_activation = matrix_copy(derivate_hidden_1_activation);
+        args[training]->derivate_hidden_1_error = matrix_copy(derivate_hidden_1_error);
+        args[training]->error_weight_gradient_hidden_1_step = matrix_copy(error_weight_gradient_hidden_1_step);
+        args[training]->error_weight_gradient_output = matrix_copy(error_weight_gradient_output);
+        args[training]->error_weight_gradient_hidden = matrix_copy(error_weight_gradient_hidden);
+        args[training]->error_weight_gradient_hidden_1 = matrix_copy(error_weight_gradient_hidden_1);
+        args[training]->error_weight_gradient_bias_hidden_1 = matrix_copy(error_weight_gradient_bias_hidden_1);
+        args[training]->error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
+        args[training]->error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
     }
+    
+    
 
     for (epoch = 0; epoch < EPOCH; epoch++)
     {
         for (training = 0; training < NUM_THREADS; training++)
         {
-            pthread_create(&threads[training], NULL, training_thread, (void *)&args[training]);
+            pthread_create(&threads[training], NULL, training_thread, (void *)args[training]);
         }
         for (training = 0; training < NUM_THREADS; training++)
         {
@@ -378,34 +384,36 @@ int main()
 
         for (i = 0; i < NUM_THREADS; i++)
         {
-            matrix_free(args[i].error_weight_gradient_output);
-            matrix_free(args[i].error_weight_gradient_hidden);
-            matrix_free(args[i].error_weight_gradient_hidden_1);
-            matrix_free(args[i].error_weight_gradient_bias_output);
-            matrix_free(args[i].error_weight_gradient_bias_hidden);
-            matrix_free(args[i].error_weight_gradient_bias_hidden_1);
-            matrix_free(args[i].weight_hidden_hidden);
-            matrix_free(args[i].weight_input_hidden);
-            matrix_free(args[i].weight_hidden_output);
-            matrix_free(args[i].bias_hidden);
-            matrix_free(args[i].bias_hidden_1);
-            matrix_free(args[i].bias_output);
+            matrix_free(args[i]->error_weight_gradient_output);
+            matrix_free(args[i]->error_weight_gradient_hidden);
+            matrix_free(args[i]->error_weight_gradient_hidden_1);
+            matrix_free(args[i]->error_weight_gradient_bias_output);
+            matrix_free(args[i]->error_weight_gradient_bias_hidden);
+            matrix_free(args[i]->error_weight_gradient_bias_hidden_1);
+            matrix_free(args[i]->weight_hidden_hidden);
+            matrix_free(args[i]->weight_input_hidden);
+            matrix_free(args[i]->weight_hidden_output);
+            matrix_free(args[i]->bias_hidden);
+            matrix_free(args[i]->bias_hidden_1);
+            matrix_free(args[i]->bias_output);
 
-            args[i].error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
-            args[i].error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
-            args[i].error_weight_gradient_bias_hidden_1 = matrix_copy(error_weight_gradient_bias_hidden_1);
-            args[i].error_weight_gradient_output = matrix_copy(error_weight_gradient_output);
-            args[i].error_weight_gradient_hidden = matrix_copy(error_weight_gradient_hidden);
-            args[i].error_weight_gradient_hidden_1 = matrix_copy(error_weight_gradient_hidden_1);
-            args[i].weight_hidden_output = matrix_copy(weight_hidden_output);
-            args[i].weight_input_hidden = matrix_copy(weight_input_hidden);
-            args[i].weight_hidden_hidden = matrix_copy(weight_hidden_hidden);
-            args[i].bias_output = matrix_copy(bias_output);
-            args[i].bias_hidden = matrix_copy(bias_hidden);
-            args[i].bias_hidden_1 = matrix_copy(bias_hidden_1);
+            args[i]->error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
+            args[i]->error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
+            args[i]->error_weight_gradient_bias_hidden_1 = matrix_copy(error_weight_gradient_bias_hidden_1);
+            args[i]->error_weight_gradient_output = matrix_copy(error_weight_gradient_output);
+            args[i]->error_weight_gradient_hidden = matrix_copy(error_weight_gradient_hidden);
+            args[i]->error_weight_gradient_hidden_1 = matrix_copy(error_weight_gradient_hidden_1);
+            args[i]->weight_hidden_output = matrix_copy(weight_hidden_output);
+            args[i]->weight_input_hidden = matrix_copy(weight_input_hidden);
+            args[i]->weight_hidden_hidden = matrix_copy(weight_hidden_hidden);
+            args[i]->bias_output = matrix_copy(bias_output);
+            args[i]->bias_hidden = matrix_copy(bias_hidden);
+            args[i]->bias_hidden_1 = matrix_copy(bias_hidden_1);
         }
 
         // reset file pointer
+    
+
     }
     for (training = 0; training < TRAINING_SET_SIZE; training++)
     {
@@ -437,17 +445,78 @@ int main()
 
     fclose(train_vectors_stream);
     fclose(train_labels_stream);
-    for (training = 0; training < TRAINING_SET_SIZE; training++)
-    {
-        free(expected_output_array[training]);
-        free(input_array[training]);
-    }
-    free(expected_output_array);
-    free(input_array);
 
-    train_vectors_stream = fopen("./data/fashion_mnist_test_vectors.csv", "r");
+
+    for (training = 0; training < NUM_THREADS; training++)
+    {
+        matrix_free(args[training]->input_layer_transpose);
+        matrix_free(args[training]->input_layer);
+        matrix_free(args[training]->weight_input_hidden);
+        matrix_free(args[training]->bias_hidden_1);
+        matrix_free(args[training]->hidden_layer_1);
+        matrix_free(args[training]->activation_hidden_1_matrix);
+        matrix_free(args[training]->weight_hidden_hidden);
+        matrix_free(args[training]->bias_hidden);
+        matrix_free(args[training]->hidden_layer);
+        matrix_free(args[training]->activation_hidden_matrix);
+        matrix_free(args[training]->weight_hidden_output);
+        matrix_free(args[training]->bias_output);
+        matrix_free(args[training]->output_layer);
+        matrix_free(args[training]->activation_output_matrix);
+        matrix_free(args[training]->expected_output);
+        matrix_free(args[training]->derivate_error_output_layer);
+        matrix_free(args[training]->derivate_output);
+        matrix_free(args[training]->derivate_output_activiation);
+        matrix_free(args[training]->derivate_output_activiation_transpose);
+        matrix_free(args[training]->derivate_error_hidden_layer_transpose);
+        matrix_free(args[training]->derivate_error_hidden_layer);
+        matrix_free(args[training]->derivate_hidden);
+        matrix_free(args[training]->derivate_hidden_activation);
+        matrix_free(args[training]->derivate_hidden_activation_transpose);
+        matrix_free(args[training]->derivate_error_hidden_layer_1_transpose);
+        matrix_free(args[training]->derivate_error_hidden_layer_1);
+        matrix_free(args[training]->derivate_error_activation_output);
+        matrix_free(args[training]->activation_hidden_matrix_transpose);
+        matrix_free(args[training]->error_weight_gradient_output_step);
+        matrix_free(args[training]->derivate_hidden_error);
+        matrix_free(args[training]->activation_hidden_1_matrix_transpose);
+        matrix_free(args[training]->error_weight_gradient_hidden_step);
+        matrix_free(args[training]->derivate_hidden_1_activation);
+        matrix_free(args[training]->derivate_hidden_1_error);
+        matrix_free(args[training]->error_weight_gradient_hidden_1_step);
+        matrix_free(args[training]->error_weight_gradient_output);
+        matrix_free(args[training]->error_weight_gradient_hidden);
+        matrix_free(args[training]->error_weight_gradient_hidden_1);
+        matrix_free(args[training]->error_weight_gradient_bias_hidden_1);
+        matrix_free(args[training]->error_weight_gradient_bias_hidden);
+        matrix_free(args[training]->error_weight_gradient_bias_output);
+
+        
+    }
+    for (i = 0; i < TRAINING_SET_SIZE; i++)
+        {
+            free(input_array[i]);
+            free(expected_output_array[i]);
+        }
+        free(input_array);
+        free(expected_output_array);
+
+
+    for (training = 0; training < NUM_THREADS; training++)
+    {
+        for (i = 0; i < TRAINING_SET_SIZE; i++)
+        {
+            free(args[training]->expected_output_array[i]);
+            free(args[training]->input_array[i]);
+        }
+        free(args[training]->expected_output_array);
+        free(args[training]->input_array);
+        free(args[training]);
+    }
+
+    train_vectors_stream = fopen("./data/mnist_test_vectors.csv", "r");
     input_array = csv_to_array_vectors(train_vectors_stream, TEST_SET_SIZE);
-    train_labels_stream = fopen("./data/fashion_mnist_test_labels.csv", "r");
+    train_labels_stream = fopen("./data/mnist_test_labels.csv", "r");
     expected_output_array = csv_to_array_labels(train_labels_stream, TEST_SET_SIZE);
     fseek(train_labels_stream, 0, SEEK_SET);
     for (training = 0; training < TEST_SET_SIZE; training++)
@@ -491,58 +560,7 @@ int main()
     free(expected_output_array);
     free(input_array);
 
-    for (training = 0; i < NUM_THREADS; i++)
-    {
-        matrix_free(args[training].input_layer_transpose);
-        matrix_free(args[training].input_layer);
-        matrix_free(args[training].weight_input_hidden);
-        matrix_free(args[training].bias_hidden_1);
-        matrix_free(args[training].hidden_layer_1);
-        matrix_free(args[training].activation_hidden_1_matrix);
-        matrix_free(args[training].weight_hidden_hidden);
-        matrix_free(args[training].bias_hidden);
-        matrix_free(args[training].hidden_layer);
-        matrix_free(args[training].activation_hidden_matrix);
-        matrix_free(args[training].weight_hidden_output);
-        matrix_free(args[training].bias_output);
-        matrix_free(args[training].output_layer);
-        matrix_free(args[training].activation_output_matrix);
-        matrix_free(args[training].expected_output);
-        matrix_free(args[training].derivate_error_output_layer);
-        matrix_free(args[training].derivate_output);
-        matrix_free(args[training].derivate_output_activiation);
-        matrix_free(args[training].derivate_output_activiation_transpose);
-        matrix_free(args[training].derivate_error_hidden_layer_transpose);
-        matrix_free(args[training].derivate_error_hidden_layer);
-        matrix_free(args[training].derivate_hidden);
-        matrix_free(args[training].derivate_hidden_activation);
-        matrix_free(args[training].derivate_hidden_activation_transpose);
-        matrix_free(args[training].derivate_error_hidden_layer_1_transpose);
-        matrix_free(args[training].derivate_error_hidden_layer_1);
-        matrix_free(args[training].derivate_error_activation_output);
-        matrix_free(args[training].activation_hidden_matrix_transpose);
-        matrix_free(args[training].error_weight_gradient_output_step);
-        matrix_free(args[training].derivate_hidden_error);
-        matrix_free(args[training].activation_hidden_1_matrix_transpose);
-        matrix_free(args[training].error_weight_gradient_hidden_step);
-        matrix_free(args[training].derivate_hidden_1_activation);
-        matrix_free(args[training].derivate_hidden_1_error);
-        matrix_free(args[training].error_weight_gradient_hidden_1_step);
-        matrix_free(args[training].error_weight_gradient_output);
-        matrix_free(args[training].error_weight_gradient_hidden);
-        matrix_free(args[training].error_weight_gradient_hidden_1);
-        matrix_free(args[training].error_weight_gradient_bias_hidden_1);
-        matrix_free(args[training].error_weight_gradient_bias_hidden);
-        matrix_free(args[training].error_weight_gradient_bias_output);
 
-        for (i = 0; i < TRAINING_SET_SIZE; i++)
-        {
-            free(input_array[i]);
-            free(expected_output_array[i]);
-        }
-        free(input_array);
-        free(expected_output_array);
-    }
 
     matrix_free(input_layer);
     matrix_free(input_layer_transpose);

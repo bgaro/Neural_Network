@@ -302,6 +302,6 @@ void *training_thread(void *arg)
     return_struct->error_weight_gradient_bias_hidden_1 = matrix_copy(error_weight_gradient_bias_hidden_1);
     return_struct->error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
     return_struct->error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
-
+    
     return (void *)return_struct;
 }
