@@ -1,4 +1,5 @@
 
+
 /**
  * @brief unit step activation functions
  * @param m input : inner potential
@@ -54,3 +55,7 @@ void softmax(matrix_t *m, matrix_t *m_d);
  * @return void
  **/
 void softmax_derivate(matrix_t *m, matrix_t *m_d);
+
+void elu(matrix_t *m, matrix_t *m_d);
+
+void elu_derivate(matrix_t *m, matrix_t *m_d);

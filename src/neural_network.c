@@ -98,13 +98,10 @@ void feed_forward(matrix_t *weights, matrix_t *input, matrix_t *bias, matrix_t *
     }
     else if (activation == RELU)
     {
-        int i;
-        for (i = 0; i < output->rows; i++)
-        {
-            output->data[i] += bias->data[i];
-            activation_output->data[i] = output->data[i] > 0 ? output->data[i] : 0;
-        }
+        matrix_add(output, bias);
+        reLU(output, activation_output);
     }
+
     else
     {
         printf("Error: feed_forward: activation not supported\n");
@@ -139,20 +136,11 @@ void *training_thread(void *arg)
     int index = args->index;
     int thread_num = args->thread_num;
 
-    float **input_array = malloc(sizeof(float *) * TRAINING_SET_SIZE);
-    int i;
-    for (i = 0; i < TRAINING_SET_SIZE; i++)
-    {
-        input_array[i] = malloc(sizeof(float) * INPUT_NEURON);
-        memcpy(input_array[i], args->input_array[i], sizeof(float) * INPUT_NEURON);
-    }
+    float **input_array = args->input_array;
+    float **expected_output_array = args->expected_output_array;
 
-    float **expected_output_array = malloc(sizeof(float *) * TRAINING_SET_SIZE);
-    for (i = 0; i < TRAINING_SET_SIZE; i++)
-    {
-        expected_output_array[i] = malloc(sizeof(float) * 10);
-        memcpy(expected_output_array[i], args->expected_output_array[i], sizeof(float) * 10);
-    }
+    int i;
+
     matrix_t *input_layer_transpose;
     matrix_t *input_layer;
     matrix_t *weight_input_hidden;
@@ -195,47 +183,47 @@ void *training_thread(void *arg)
     matrix_t *error_weight_gradient_bias_hidden;
     matrix_t *error_weight_gradient_bias_output;
 
-    input_layer_transpose = matrix_copy(args->input_layer_transpose);
-    input_layer = matrix_copy(args->input_layer);
-    weight_input_hidden = matrix_copy(args->weight_input_hidden);
-    bias_hidden_1 = matrix_copy(args->bias_hidden_1);
-    hidden_layer_1 = matrix_copy(args->hidden_layer_1);
-    activation_hidden_1_matrix = matrix_copy(args->activation_hidden_1_matrix);
-    weight_hidden_hidden = matrix_copy(args->weight_hidden_hidden);
-    bias_hidden = matrix_copy(args->bias_hidden);
-    hidden_layer = matrix_copy(args->hidden_layer);
-    activation_hidden_matrix = matrix_copy(args->activation_hidden_matrix);
-    weight_hidden_output = matrix_copy(args->weight_hidden_output);
-    bias_output = matrix_copy(args->bias_output);
-    output_layer = matrix_copy(args->output_layer);
-    activation_output_matrix = matrix_copy(args->activation_output_matrix);
-    expected_output = matrix_copy(args->expected_output);
-    derivate_error_output_layer = matrix_copy(args->derivate_error_output_layer);
-    derivate_output = matrix_copy(args->derivate_output);
-    derivate_output_activiation = matrix_copy(args->derivate_output_activiation);
-    derivate_output_activiation_transpose = matrix_copy(args->derivate_output_activiation_transpose);
-    derivate_error_hidden_layer_transpose = matrix_copy(args->derivate_error_hidden_layer_transpose);
-    derivate_error_hidden_layer = matrix_copy(args->derivate_error_hidden_layer);
-    derivate_hidden = matrix_copy(args->derivate_hidden);
-    derivate_hidden_activation = matrix_copy(args->derivate_hidden_activation);
-    derivate_hidden_activation_transpose = matrix_copy(args->derivate_hidden_activation_transpose);
-    derivate_error_hidden_layer_1_transpose = matrix_copy(args->derivate_error_hidden_layer_1_transpose);
-    derivate_error_hidden_layer_1 = matrix_copy(args->derivate_error_hidden_layer_1);
-    derivate_error_activation_output = matrix_copy(args->derivate_error_activation_output);
-    activation_hidden_matrix_transpose = matrix_copy(args->activation_hidden_matrix_transpose);
-    error_weight_gradient_output_step = matrix_copy(args->error_weight_gradient_output_step);
-    derivate_hidden_error = matrix_copy(args->derivate_hidden_error);
-    activation_hidden_1_matrix_transpose = matrix_copy(args->activation_hidden_1_matrix_transpose);
-    error_weight_gradient_hidden_step = matrix_copy(args->error_weight_gradient_hidden_step);
-    derivate_hidden_1_activation = matrix_copy(args->derivate_hidden_1_activation);
-    derivate_hidden_1_error = matrix_copy(args->derivate_hidden_1_error);
-    error_weight_gradient_hidden_1_step = matrix_copy(args->error_weight_gradient_hidden_1_step);
-    error_weight_gradient_output = matrix_copy(args->error_weight_gradient_output);
-    error_weight_gradient_hidden = matrix_copy(args->error_weight_gradient_hidden);
-    error_weight_gradient_hidden_1 = matrix_copy(args->error_weight_gradient_hidden_1);
-    error_weight_gradient_bias_hidden_1 = matrix_copy(args->error_weight_gradient_bias_hidden_1);
-    error_weight_gradient_bias_hidden = matrix_copy(args->error_weight_gradient_bias_hidden);
-    error_weight_gradient_bias_output = matrix_copy(args->error_weight_gradient_bias_output);
+    input_layer_transpose = args->input_layer_transpose;
+    input_layer = args->input_layer;
+    weight_input_hidden = args->weight_input_hidden;
+    bias_hidden_1 = args->bias_hidden_1;
+    hidden_layer_1 = args->hidden_layer_1;
+    activation_hidden_1_matrix = args->activation_hidden_1_matrix;
+    weight_hidden_hidden = args->weight_hidden_hidden;
+    bias_hidden = args->bias_hidden;
+    hidden_layer = args->hidden_layer;
+    activation_hidden_matrix = args->activation_hidden_matrix;
+    weight_hidden_output = args->weight_hidden_output;
+    bias_output = args->bias_output;
+    output_layer = args->output_layer;
+    activation_output_matrix = args->activation_output_matrix;
+    expected_output = args->expected_output;
+    derivate_error_output_layer = args->derivate_error_output_layer;
+    derivate_output = args->derivate_output;
+    derivate_output_activiation = args->derivate_output_activiation;
+    derivate_output_activiation_transpose = args->derivate_output_activiation_transpose;
+    derivate_error_hidden_layer_transpose = args->derivate_error_hidden_layer_transpose;
+    derivate_error_hidden_layer = args->derivate_error_hidden_layer;
+    derivate_hidden = args->derivate_hidden;
+    derivate_hidden_activation = args->derivate_hidden_activation;
+    derivate_hidden_activation_transpose = args->derivate_hidden_activation_transpose;
+    derivate_error_hidden_layer_1_transpose = args->derivate_error_hidden_layer_1_transpose;
+    derivate_error_hidden_layer_1 = args->derivate_error_hidden_layer_1;
+    derivate_error_activation_output = args->derivate_error_activation_output;
+    activation_hidden_matrix_transpose = args->activation_hidden_matrix_transpose;
+    error_weight_gradient_output_step = args->error_weight_gradient_output_step;
+    derivate_hidden_error = args->derivate_hidden_error;
+    activation_hidden_1_matrix_transpose = args->activation_hidden_1_matrix_transpose;
+    error_weight_gradient_hidden_step = args->error_weight_gradient_hidden_step;
+    derivate_hidden_1_activation = args->derivate_hidden_1_activation;
+    derivate_hidden_1_error = args->derivate_hidden_1_error;
+    error_weight_gradient_hidden_1_step = args->error_weight_gradient_hidden_1_step;
+    error_weight_gradient_output = args->error_weight_gradient_output;
+    error_weight_gradient_hidden = args->error_weight_gradient_hidden;
+    error_weight_gradient_hidden_1 = args->error_weight_gradient_hidden_1;
+    error_weight_gradient_bias_hidden_1 = args->error_weight_gradient_bias_hidden_1;
+    error_weight_gradient_bias_hidden = args->error_weight_gradient_bias_hidden;
+    error_weight_gradient_bias_output = args->error_weight_gradient_bias_output;
 
     for (i = index; i < TRAINING_SET_SIZE;)
     {
@@ -314,55 +302,6 @@ void *training_thread(void *arg)
     return_struct->error_weight_gradient_bias_hidden_1 = matrix_copy(error_weight_gradient_bias_hidden_1);
     return_struct->error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
     return_struct->error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
-    matrix_free(input_layer_transpose);
-    matrix_free(input_layer);
-    matrix_free(weight_input_hidden);
-    matrix_free(bias_hidden_1);
-    matrix_free(hidden_layer_1);
-    matrix_free(activation_hidden_1_matrix);
-    matrix_free(weight_hidden_hidden);
-    matrix_free(bias_hidden);
-    matrix_free(hidden_layer);
-    matrix_free(activation_hidden_matrix);
-    matrix_free(weight_hidden_output);
-    matrix_free(bias_output);
-    matrix_free(output_layer);
-    matrix_free(activation_output_matrix);
-    matrix_free(expected_output);
-    matrix_free(derivate_error_output_layer);
-    matrix_free(derivate_output);
-    matrix_free(derivate_output_activiation);
-    matrix_free(derivate_output_activiation_transpose);
-    matrix_free(derivate_error_hidden_layer_transpose);
-    matrix_free(derivate_error_hidden_layer);
-    matrix_free(derivate_hidden);
-    matrix_free(derivate_hidden_activation);
-    matrix_free(derivate_hidden_activation_transpose);
-    matrix_free(derivate_error_hidden_layer_1_transpose);
-    matrix_free(derivate_error_hidden_layer_1);
-    matrix_free(derivate_error_activation_output);
-    matrix_free(activation_hidden_matrix_transpose);
-    matrix_free(error_weight_gradient_output_step);
-    matrix_free(derivate_hidden_error);
-    matrix_free(activation_hidden_1_matrix_transpose);
-    matrix_free(error_weight_gradient_hidden_step);
-    matrix_free(derivate_hidden_1_activation);
-    matrix_free(derivate_hidden_1_error);
-    matrix_free(error_weight_gradient_hidden_1_step);
-    matrix_free(error_weight_gradient_output);
-    matrix_free(error_weight_gradient_hidden);
-    matrix_free(error_weight_gradient_hidden_1);
-    matrix_free(error_weight_gradient_bias_hidden_1);
-    matrix_free(error_weight_gradient_bias_hidden);
-    matrix_free(error_weight_gradient_bias_output);
-
-    for (i = 0; i < TRAINING_SET_SIZE; i++)
-    {
-        free(input_array[i]);
-        free(expected_output_array[i]);
-    }
-    free(input_array);
-    free(expected_output_array);
 
     return (void *)return_struct;
 }
