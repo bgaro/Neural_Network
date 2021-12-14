@@ -11,7 +11,7 @@
 #include "csv_to_array.h"
 #include "neural_network.h"
 
-#define NUM_THREADS 2
+#define NUM_THREADS 4
 #define INPUT_NEURON 784
 #define HIDDEN_NEURON_1 21
 #define HIDDEN_NEURON 45
@@ -19,17 +19,17 @@
 #define LAYER_NUM 4
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
-#define EPOCH 700
+#define EPOCH 1586
 int main()
 {
 
-    FILE *train_vectors_stream = fopen("./data/mnist_train_vectors.csv", "r");
+    FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
         printf("Error opening file\n");
         return 1;
     }
-    FILE *train_labels_stream = fopen("./data/mnist_train_labels.csv", "r");
+    FILE *train_labels_stream = fopen("./data/fashion_mnist_train_labels.csv", "r");
     if (train_labels_stream == NULL)
     {
         printf("Error opening file\n");
@@ -37,14 +37,17 @@ int main()
     }
     remove("actualTestPredictions");
     remove("trainPredictions");
+    FILE *test_vectors_stream = fopen("./data/fashion_mnist_test_vectors.csv", "r");
+    FILE *test_labels_stream = fopen("./data/fashion_mnist_test_labels.csv", "r");
 
     float **input_array;
+    float **input_array_test;
     int epoch = 0;
     int training = 0;
     int i;
     pthread_t threads[NUM_THREADS];
     arguments *args[NUM_THREADS];
-    for(i = 0; i<NUM_THREADS;i++)
+    for (i = 0; i < NUM_THREADS; i++)
     {
         args[i] = malloc(sizeof(arguments));
     }
@@ -55,13 +58,21 @@ int main()
 
     input_array = csv_to_array_vectors(train_vectors_stream, TRAINING_SET_SIZE);
     float **expected_output_array;
+    float **expected_output_array_test;
     expected_output_array = csv_to_array_labels(train_labels_stream, TRAINING_SET_SIZE);
-    float learning_rate = 0.106;
+    expected_output_array_test = csv_to_array_labels(test_labels_stream, TEST_SET_SIZE);
+    input_array_test = csv_to_array_vectors(test_vectors_stream, TEST_SET_SIZE);
+
+    float learning_rate = 0.12;
     float alpha = 0.95;
 
     int train_prediction_fd = 0;
     int test_prediction_fd = 0;
     int prediction = 0;
+    int prediction_2 = 0;
+    int cpt = 0;
+    float max = 0.0;
+    int epoch_max = 0;
     char prediction_buffer[3];
     train_prediction_fd = open("trainPredictions", O_CREAT | O_WRONLY, 0644);
     test_prediction_fd = open("actualTestPredictions", O_CREAT | O_WRONLY, 0644);
@@ -218,8 +229,6 @@ int main()
         args[training]->error_weight_gradient_bias_hidden = matrix_copy(error_weight_gradient_bias_hidden);
         args[training]->error_weight_gradient_bias_output = matrix_copy(error_weight_gradient_bias_output);
     }
-    
-    
 
     for (epoch = 0; epoch < EPOCH; epoch++)
     {
@@ -411,10 +420,42 @@ int main()
             args[i]->bias_hidden_1 = matrix_copy(bias_hidden_1);
         }
 
-        // reset file pointer
-    
+        for (training = 0; training < TEST_SET_SIZE; training++)
+        {
 
+            // Feed forward process
+
+            // initialisation of input layer
+
+            matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array_test[training]);
+            matrix_transpose(input_layer_transpose, input_layer);
+
+            // feed forward on hidden layer 1
+            feed_forward(weight_input_hidden, input_layer, bias_hidden_1, hidden_layer_1, activation_hidden_1_matrix, RELU);
+
+            // feed forward on hidden layer
+            feed_forward(weight_hidden_hidden, activation_hidden_1_matrix, bias_hidden, hidden_layer, activation_hidden_matrix, RELU);
+
+            // feed forward on output layer
+            feed_forward(weight_hidden_output, activation_hidden_matrix, bias_output, output_layer, activation_output_matrix, SOFTMAX);
+            // error function gradiant
+            matrix_initialize(expected_output, expected_output->rows, expected_output->cols, expected_output_array_test[training]);
+            prediction = get_label(activation_output_matrix);
+            prediction_2 = get_label(expected_output);
+            if (prediction == prediction_2)
+                cpt++;
+        }
+        printf("EPOCH : %d | ACCURACY : %f \n", epoch, (float)cpt / (float)TEST_SET_SIZE * 100);
+        if (((float)cpt / (float)TEST_SET_SIZE * 100) > max)
+        {
+            max = (float)cpt / (float)TEST_SET_SIZE * 100;
+            epoch_max = epoch;
+        }
+        cpt = 0;
+
+        // reset file pointer
     }
+    printf("best : EPOCH : %d | ACCURACY : %f \n", epoch_max, max);
     for (training = 0; training < TRAINING_SET_SIZE; training++)
     {
 
@@ -442,10 +483,6 @@ int main()
             return 1;
         }
     }
-
-    fclose(train_vectors_stream);
-    fclose(train_labels_stream);
-
 
     for (training = 0; training < NUM_THREADS; training++)
     {
@@ -490,17 +527,14 @@ int main()
         matrix_free(args[training]->error_weight_gradient_bias_hidden_1);
         matrix_free(args[training]->error_weight_gradient_bias_hidden);
         matrix_free(args[training]->error_weight_gradient_bias_output);
-
-        
     }
     for (i = 0; i < TRAINING_SET_SIZE; i++)
-        {
-            free(input_array[i]);
-            free(expected_output_array[i]);
-        }
-        free(input_array);
-        free(expected_output_array);
-
+    {
+        free(input_array[i]);
+        free(expected_output_array[i]);
+    }
+    free(input_array);
+    free(expected_output_array);
 
     for (training = 0; training < NUM_THREADS; training++)
     {
@@ -514,11 +548,6 @@ int main()
         free(args[training]);
     }
 
-    train_vectors_stream = fopen("./data/mnist_test_vectors.csv", "r");
-    input_array = csv_to_array_vectors(train_vectors_stream, TEST_SET_SIZE);
-    train_labels_stream = fopen("./data/mnist_test_labels.csv", "r");
-    expected_output_array = csv_to_array_labels(train_labels_stream, TEST_SET_SIZE);
-    fseek(train_labels_stream, 0, SEEK_SET);
     for (training = 0; training < TEST_SET_SIZE; training++)
     {
 
@@ -526,7 +555,7 @@ int main()
 
         // initialisation of input layer
 
-        matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array[training]);
+        matrix_initialize(input_layer_transpose, 1, INPUT_NEURON, input_array_test[training]);
         matrix_transpose(input_layer_transpose, input_layer);
 
         // feed forward on hidden layer 1
@@ -546,21 +575,17 @@ int main()
             return 1;
         }
     }
-    fclose(train_vectors_stream);
-    fclose(train_labels_stream);
     printf("Parameters : EPOCH : %i LEARNING RATE : %f MOMENTUM : %f\nHIDDEN_LAYER 1 : %i HIDDEN_LAYER_2 : %i TRAINING_SET_SIZE : %i\n", EPOCH, learning_rate, alpha, HIDDEN_NEURON_1, HIDDEN_NEURON, TRAINING_SET_SIZE);
     // free block
     end = time(NULL);
     printf("Time : %f\n", (double)(end - start) / 60.0);
     for (training = 0; training < TEST_SET_SIZE; training++)
     {
-        free(expected_output_array[training]);
-        free(input_array[training]);
+        free(expected_output_array_test[training]);
+        free(input_array_test[training]);
     }
-    free(expected_output_array);
-    free(input_array);
-
-
+    free(expected_output_array_test);
+    free(input_array_test);
 
     matrix_free(input_layer);
     matrix_free(input_layer_transpose);
