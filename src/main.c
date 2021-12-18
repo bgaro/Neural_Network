@@ -11,7 +11,7 @@
 #include "csv_to_array.h"
 #include "neural_network.h"
 
-#define NUM_THREADS 8
+#define NUM_THREADS 16
 #define INPUT_NEURON 784
 #define HIDDEN_NEURON_1 21
 #define HIDDEN_NEURON 45
@@ -19,10 +19,10 @@
 #define LAYER_NUM 4
 #define TRAINING_SET_SIZE 60000
 #define TEST_SET_SIZE 10000
-#define EPOCH 1587
+#define EPOCH 1866
 int main()
 {
-
+srand(0);
     FILE *train_vectors_stream = fopen("./data/fashion_mnist_train_vectors.csv", "r");
     if (train_vectors_stream == NULL)
     {
@@ -69,8 +69,10 @@ int main()
     int train_prediction_fd = 0;
     int test_prediction_fd = 0;
     int prediction = 0;
-    int prediction_2 = 0;
-    int cpt = 0;
+    //int prediction_2 = 0;
+   // float max = 0.0;
+    //int epoch_max = 0;
+    //int cpt = 0;
     char prediction_buffer[3];
     train_prediction_fd = open("trainPredictions", O_CREAT | O_WRONLY, 0644);
     test_prediction_fd = open("actualTestPredictions", O_CREAT | O_WRONLY, 0644);
@@ -416,7 +418,7 @@ int main()
             args[i]->bias_hidden_1 = matrix_copy(bias_hidden_1);
         }
 
-        for (training = 0; training < TEST_SET_SIZE; training++)
+/*        for (training = 0; training < TEST_SET_SIZE; training++)
         {
 
             // Feed forward process
@@ -442,7 +444,17 @@ int main()
                 cpt++;
         }
 
+        printf("EPOCH : %d | ACCURACY : %f \n", epoch, (float)cpt / (float)TEST_SET_SIZE * 100);
+        if (((float)cpt / (float)TEST_SET_SIZE * 100) > max)
+        {
+            max = (float)cpt / (float)TEST_SET_SIZE * 100;
+            epoch_max = epoch;
+        }
+        cpt = 0;
+*/
+        // reset file pointer
     }
+    //printf("best : EPOCH : %d | ACCURACY : %f \n", epoch_max, max);
     for (training = 0; training < TRAINING_SET_SIZE; training++)
     {
 

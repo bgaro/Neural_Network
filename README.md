@@ -4,13 +4,14 @@ GARO Benjamin (522660)
 
 [OUR_COMMENTS]
 
-The proposed solution achieves ...% in about ... minutes. To achieve such results, we simply implemented a multithreading system to increase the computational speed that was blocking us in the first rendering. This version works on 4 cores to avoid problems of server overload, but we tested on 32 and 48 cores with more learning and we managed to exceed 89% accuracy in less than 7 minutes. As this solution is extremely resource-intensive, we decided not to include it in the rendering. 
+The proposed solution achieves 88.35% in about 11 minutes. To achieve such results, we simply implemented a multithreading system to increase the computational speed that was blocking us in the first rendering. This version works on 16 cores to avoid problems of server overload, but we tested on 32 and 48 cores with more learning and we managed to exceed 89% accuracy in less than 7 minutes. As this solution is extremely resource-intensive, we decided not to include it in the rendering. 
 
 
 NOTE, if the ./RUN doesn't work, use : 
 
 gcc -Wall -g -Ofast -Wextra ./src/main.c ./src/csv_to_array.c ./src/matrix.c ./src/activation.c ./src/neural_network.c -o main -lm
 ./main
+cd python_evaluator
 python3 evaluate.py ../actualTestPredictions ../data/fashion_mnist_test_labels.csv
 
 

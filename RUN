@@ -17,5 +17,3 @@ echo "#################"
 
 ./main
 
-cd python_evaluator
-python3 evaluate.py ../actualTestPredictions ../data/mnist_test_labels.csv
