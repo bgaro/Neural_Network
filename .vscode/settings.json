@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "activation.h": "c",
+    "matrix.h": "c",
+    "string.h": "c"
+  }
+}

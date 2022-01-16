@@ -1,0 +1,43 @@
+Parameters : EPOCH : 1866 LEARNING RATE : 0.120000 MOMENTUM : 0.950000
+HIDDEN_LAYER 1 : 21 HIDDEN_LAYER_2 : 45 TRAINING_SET_SIZE : 60000
+Epoch 0
+Epoch 50
+Epoch 100
+Epoch 150
+Epoch 200
+Epoch 250
+Epoch 300
+Epoch 350
+Epoch 400
+Epoch 450
+Epoch 500
+Epoch 550
+Epoch 600
+Epoch 650
+Epoch 700
+Epoch 750
+Epoch 800
+Epoch 850
+Epoch 900
+Epoch 950
+Epoch 1000
+Epoch 1050
+Epoch 1100
+Epoch 1150
+Epoch 1200
+Epoch 1250
+Epoch 1300
+Epoch 1350
+Epoch 1400
+Epoch 1450
+Epoch 1500
+Epoch 1550
+Epoch 1600
+Epoch 1650
+Epoch 1700
+Epoch 1750
+Epoch 1800
+Epoch 1850
+Parameters : EPOCH : 1866 LEARNING RATE : 0.120000 MOMENTUM : 0.950000
+HIDDEN_LAYER 1 : 21 HIDDEN_LAYER_2 : 45 TRAINING_SET_SIZE : 60000
+Time : 11.633333
