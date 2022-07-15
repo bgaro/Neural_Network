@@ -7,12 +7,12 @@ The proposed solution achieves 88.35% in about 11 minutes. To achieve such resul
 
 
 NOTE, if the ./RUN doesn't work, use : 
-
+```bash
 gcc -Wall -g -Ofast -Wextra ./src/main.c ./src/csv_to_array.c ./src/matrix.c ./src/activation.c ./src/neural_network.c -o main -lm
-./main
-cd python_evaluator
+./main  
+cd python_evaluator  
 python3 evaluate.py ../actualTestPredictions ../data/fashion_mnist_test_labels.csv
-
+```
 
 
 
